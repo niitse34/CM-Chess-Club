@@ -1,0 +1,93 @@
+{
+  "espacios": [
+    {"id": "sala_principal", "nombre": "Sala Principal", "capacidad": 20},
+    {"id": "sala_estudio", "nombre": "Sala de Estudio", "capacidad": 8}
+  ],
+
+  "equipamiento":  [
+    {"id": "tablero_1", "nombre": "Tablero 1", "tipo": "tablero"},
+    {"id": "tablero_2", "nombre": "Tablero 2", "tipo": "tablero"},
+    {"id": "tablero_3", "nombre": "Tablero 3", "tipo": "tablero"},
+    {"id": "piezas_1", "nombre": "Piezas 1", "tipo": "piezas"},
+    {"id": "piezas_2", "nombre": "Piezas 2", "tipo": "piezas"},
+    {"id": "piezas_3", "nombre": "Piezas 3", "tipo": "piezas"},
+    {"id": "reloj_1", "nombre": "Reloj Digital 1", "tipo": "reloj"},
+    {"id": "reloj_2", "nombre": "Reloj Digital 2", "tipo": "reloj"},
+    {"id": "reloj_3", "nombre": "Reloj Digital 3", "tipo": "reloj"}
+  ],
+
+  "personal": [
+    {"id": "im", "nombre": "IM Carlos Magnesio ", "tipo": "instructor"},
+    {"id": "fm", "nombre": "MF Ana Kremlin", "tipo": "instructor"},
+    {"id": "arbitro_1", "nombre": "Pepe", "tipo": "arbitro"},
+    {"id": "arbitro_2", "nombre": "Luciano", "tipo": "arbitro"},
+    {"id": "arbitro_3", "nombre": "Bonifacio", "tipo": "arbitro"}
+  ],
+
+  "tipos_evento": [
+    {"id": "torneo", "nombre": "Torneo", "duracion_min": 60},
+    {"id": "clase", "nombre": "Clase", "duracion_min": 15},
+    {"id": "partida", "nombre": "Partida Amistosa", "duracion_min": 5},
+    {"id": "analisis", "nombre": "Análisis", "duracion_min": 20},
+    {"id": "simultaneas", "nombre": "Simultáneas", "duracion_min": 30}
+  ],
+
+  "restricciones": [
+    {
+      "tipo": "co_requisito",
+      "nombre": "Torneo requiere Árbitro",
+      "aplica": "torneo",
+      "requiere": ["arbitro_1", "arbitro_2"],
+      "cantidad_minima": 1
+    },
+    {
+      "tipo": "co_requisito", 
+      "nombre": "Clase requiere Instructor",
+      "aplica": "clase",
+      "requiere": ["instructor_1", "instructor_2"],
+      "cantidad_minima": 1
+    },
+    {
+      "tipo": "exclusion",
+      "nombre": "No torneo y clase juntos",
+      "recursos": ["sala_principal"]
+    },
+    {
+      "tipo": "exclusion",
+      "nombre": "Relojes solo para torneos",
+      "recursos": ["reloj_1", "reloj_2"],
+      "eventos_permitidos": ["torneo"]
+    }
+  ],
+
+  "eventos": [
+    {
+      "id": "ev1",
+      "nombre": "Torneo Mensual",
+      "tipo": "torneo",
+      "fecha": "2024-06-15",
+      "hora_inicio": "10:00",
+      "hora_fin": "14:00",
+      "recursos": ["sala_principal", "tablero_1", "tablero_2", "piezas_1", "reloj_1", "arbitro_1"],
+      "participantes": 16
+    },
+    {
+      "id": "ev2",
+      "nombre": "Clase de Aperturas",
+      "tipo": "clase",
+      "fecha": "2024-06-12",
+      "hora_inicio": "17:00",
+      "hora_fin": "19:00",
+      "recursos": ["sala_estudio", "tablero_3", "piezas_2", "proyector", "instructor_1"],
+      "participantes": 6
+    }
+  ],
+
+  "config": {
+    "horario_apertura": "09:00",
+    "horario_cierre": "21:00",
+    "anticipacion_reserva": 7,
+    "duracion_minima": 0.5,
+    "duracion_maxima": 8
+  }
+}
