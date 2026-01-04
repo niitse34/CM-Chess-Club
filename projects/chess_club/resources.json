@@ -8,44 +8,59 @@
     {"id": "tablero_1", "nombre": "Tablero 1", "tipo": "tablero"},
     {"id": "tablero_2", "nombre": "Tablero 2", "tipo": "tablero"},
     {"id": "tablero_3", "nombre": "Tablero 3", "tipo": "tablero"},
+    {"id": "tablero_4", "nombre": "Tablero 4", "tipo": "tablero"},
     {"id": "piezas_1", "nombre": "Piezas 1", "tipo": "piezas"},
     {"id": "piezas_2", "nombre": "Piezas 2", "tipo": "piezas"},
     {"id": "piezas_3", "nombre": "Piezas 3", "tipo": "piezas"},
+    {"id": "piezas_4", "nombre": "Piezas 4", "tipo": "piezas"},
     {"id": "reloj_1", "nombre": "Reloj Digital 1", "tipo": "reloj"},
     {"id": "reloj_2", "nombre": "Reloj Digital 2", "tipo": "reloj"},
-    {"id": "reloj_3", "nombre": "Reloj Digital 3", "tipo": "reloj"}
+    {"id": "reloj_3", "nombre": "Reloj Digital 3", "tipo": "reloj"},
+    {"id": "reloj_0", "nombre": "Reloj Analogico", "tipo": "reloj"}
+
   ],
 
   "personal": [
-    {"id": "im", "nombre": "IM Carlos Magnesio ", "tipo": "instructor"},
     {"id": "fm", "nombre": "MF Ana Kremlin", "tipo": "instructor"},
+    {"id": "im", "nombre": "IM Carlos Magnesio ", "tipo": "instructor"},
+    {"id": "gm", "nombre": "GM Fidel Negracapa", "tipo": "instructor"},
     {"id": "arbitro_1", "nombre": "Pepe", "tipo": "arbitro"},
     {"id": "arbitro_2", "nombre": "Luciano", "tipo": "arbitro"},
-    {"id": "arbitro_3", "nombre": "Bonifacio", "tipo": "arbitro"}
+    {"id": "arbitro_3", "nombre": "Bonifacio", "tipo": "arbitro"},
+    {"id": "comentador_1", "nombre": "Rameshbabu Sergeyevski", "tipo": "comentador"},
+    {"id": "comentador_2", "nombre": "Irina Pavlovina", "tipo": "comentador"}
+    
   ],
 
   "tipos_evento": [
-    {"id": "torneo", "nombre": "Torneo", "duracion_min": 60},
-    {"id": "clase", "nombre": "Clase", "duracion_min": 15},
-    {"id": "partida", "nombre": "Partida Amistosa", "duracion_min": 5},
-    {"id": "analisis", "nombre": "Análisis", "duracion_min": 20},
-    {"id": "simultaneas", "nombre": "Simultáneas", "duracion_min": 30}
+    {"id": "torneo", "nombre": "Torneo", "duracion_min": 2},
+    {"id": "clase", "nombre": "Clase", "duracion_min": 1},
+    {"id": "partida", "nombre": "Partida Amistosa", "duracion_min": 0.5},
+    {"id": "analisis", "nombre": "Análisis", "duracion_min": 1},
+    {"id": "simultaneas", "nombre": "Simultáneas", "duracion_min": 1.5}
   ],
 
   "restricciones": [
     {
       "tipo": "co_requisito",
       "nombre": "Torneo requiere Árbitro",
-      "aplica": "torneo",
-      "requiere": ["arbitro_1", "arbitro_2"],
+      "caso": "torneo",
+      "requiere": ["arbitro_1", "arbitro_2", "arbitro_3"],
       "cantidad_minima": 1
     },
     {
       "tipo": "co_requisito", 
       "nombre": "Clase requiere Instructor",
-      "aplica": "clase",
-      "requiere": ["instructor_1", "instructor_2"],
+      "caso": "clase",
+      "requiere": ["fm","im","gm"],
       "cantidad_minima": 1
+    },
+    {
+      "tipo": "co_requisito",
+      "nombre": "Partida Amistosa requiere Tablero y Piezas",
+      "caso": "partida",
+      "requiere": ["tablero_1", "tablero_2", "tablero_3", "tablero_4", "piezas_1", "piezas_2", "piezas_3", "piezas_4"],
+      "cantidad_minima": 2
     },
     {
       "tipo": "exclusion",
@@ -55,7 +70,7 @@
     {
       "tipo": "exclusion",
       "nombre": "Relojes solo para torneos",
-      "recursos": ["reloj_1", "reloj_2"],
+      "recursos": ["reloj_1", "reloj_2","reloj_3","reloj_0"],
       "eventos_permitidos": ["torneo"]
     }
   ],
@@ -63,7 +78,7 @@
   "eventos": [
     {
       "id": "ev1",
-      "nombre": "Torneo Mensual",
+      "nombre": "Torneo de Candidatos",
       "tipo": "torneo",
       "fecha": "2024-06-15",
       "hora_inicio": "10:00",
@@ -80,12 +95,34 @@
       "hora_fin": "19:00",
       "recursos": ["sala_estudio", "tablero_3", "piezas_2", "proyector", "instructor_1"],
       "participantes": 6
+    },
+    {
+      "id": "ev3",
+      "nombre": "Puzzle Rush",
+      "tipo": "especial",
+      "fecha": "2024-06-18",
+      "hora_inicio": "10:00",
+      "hora_fin": "11:30",
+      "recursos": [],
+      "participantes": 10
+    },
+    {
+      "id": "ev4",
+      "nombre": "Simultanea con Maestro",
+      "tipo": "simultanea",
+      "fecha": "2024-06-18",
+      "hora_inicio": "10:00",
+      "hora_fin": "11:30",
+      "recursos": ["gm"],
+      "participantes": 15
     }
+
+    
   ],
 
   "config": {
     "horario_apertura": "09:00",
-    "horario_cierre": "21:00",
+    "horario_final": "21:00",
     "anticipacion_reserva": 7,
     "duracion_minima": 0.5,
     "duracion_maxima": 8
