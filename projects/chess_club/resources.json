@@ -1,34 +1,34 @@
 {
-  "espacios": [
-    {"id": "sala_principal", "nombre": "Sala Principal", "capacidad": 20},
-    {"id": "sala_estudio", "nombre": "Sala de Estudio", "capacidad": 8}
+  "rooms": [
+    {"id": "main_room", "nombre": "Main Room", "capacity": 20},
+    {"id": "study_room", "nombre": "Study Room", "capacity": 8}
   ],
 
-  "equipamiento":  [
-    {"id": "tablero_1", "nombre": "Tablero 1", "tipo": "tablero"},
-    {"id": "tablero_2", "nombre": "Tablero 2", "tipo": "tablero"},
-    {"id": "tablero_3", "nombre": "Tablero 3", "tipo": "tablero"},
-    {"id": "tablero_4", "nombre": "Tablero 4", "tipo": "tablero"},
-    {"id": "piezas_1", "nombre": "Piezas 1", "tipo": "piezas"},
-    {"id": "piezas_2", "nombre": "Piezas 2", "tipo": "piezas"},
-    {"id": "piezas_3", "nombre": "Piezas 3", "tipo": "piezas"},
-    {"id": "piezas_4", "nombre": "Piezas 4", "tipo": "piezas"},
-    {"id": "reloj_1", "nombre": "Reloj Digital 1", "tipo": "reloj"},
-    {"id": "reloj_2", "nombre": "Reloj Digital 2", "tipo": "reloj"},
-    {"id": "reloj_3", "nombre": "Reloj Digital 3", "tipo": "reloj"},
-    {"id": "reloj_0", "nombre": "Reloj Analogico", "tipo": "reloj"}
+  "equipment":  [
+    {"id": "board_1", "nombre": "Board 1", "tipo": "board"},
+    {"id": "board_2", "nombre": "Board 1", "tipo": "board"},
+    {"id": "board_3", "nombre": "Board 1", "tipo": "board"},
+    {"id": "board_4", "nombre": "Board 1", "tipo": "board"},
+    {"id": "pieces_1", "nombre": "Pieces 1", "tipo": "pieces"},
+    {"id": "pieces_2", "nombre": "Pieces 2", "tipo": "pieces"},
+    {"id": "pieces_3", "nombre": "Pieces 3", "tipo": "pieces"},
+    {"id": "piezas_4", "nombre": "Pieces 4", "tipo": "pieces"},
+    {"id": "clock_1", "nombre": "Digital Clock 1", "tipo": "clock"},
+    {"id": "clock_2", "nombre": "Digital Clock 2", "tipo": "clock"},
+    {"id": "clock_3", "nombre": "Digital Clock 3", "tipo": "clock"},
+    {"id": "clock_0", "nombre": "Analog Clock", "tipo": "clock"}
 
   ],
 
-  "personal": [
-    {"id": "fm", "nombre": "MF Ana Kremlin", "tipo": "instructor"},
-    {"id": "im", "nombre": "IM Carlos Magnesio ", "tipo": "instructor"},
-    {"id": "gm", "nombre": "GM Fidel Negracapa", "tipo": "instructor"},
-    {"id": "arbitro_1", "nombre": "Pepe", "tipo": "arbitro"},
-    {"id": "arbitro_2", "nombre": "Luciano", "tipo": "arbitro"},
-    {"id": "arbitro_3", "nombre": "Bonifacio", "tipo": "arbitro"},
-    {"id": "comentador_1", "nombre": "Rameshbabu Sergeyevski", "tipo": "comentador"},
-    {"id": "comentador_2", "nombre": "Irina Pavlovina", "tipo": "comentador"}
+  "staff": [
+    {"id": "fm", "name": "FM Ana Kremlin", "type": "coach"},
+    {"id": "im", "name": "IM Carlos Magnesio ", "type": "coach"},
+    {"id": "gm", "name": "GM Fidel Negracapa", "type": "coach"},
+    {"id": "arbiter_1", "name": "Pepe", "type": "arbiter"},
+    {"id": "arbiter_2", "name": "Luciano", "type": "arbiter"},
+    {"id": "arbiter_3", "name": "Bonifacio", "type": "arbiter"},
+    {"id": "comentator_1", "name": "Rameshbabu Sergeyevski", "type": "comentator"},
+    {"id": "comentator_2", "name": "Irina Pavlovina", "type": "comentator"}
     
   ],
 
@@ -62,11 +62,7 @@
       "requiere": ["tablero_1", "tablero_2", "tablero_3", "tablero_4", "piezas_1", "piezas_2", "piezas_3", "piezas_4"],
       "cantidad_minima": 2
     },
-    {
-      "tipo": "exclusion",
-      "nombre": "No torneo y clase juntos",
-      "recursos": ["sala_principal"]
-    },
+    
     {
       "tipo": "exclusion",
       "nombre": "Relojes solo para torneos",
