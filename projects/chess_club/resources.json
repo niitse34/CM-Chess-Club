@@ -1,126 +1,122 @@
 {
   "rooms": [
-    {"id": "main_room", "nombre": "Main Room", "capacity": 20},
-    {"id": "study_room", "nombre": "Study Room", "capacity": 8}
+    {"id": "main_room", "name": "Main Room", "capacity": 20},
+    {"id": "study_room", "name": "Study Room", "capacity": 8}
   ],
 
   "equipment":  [
-    {"id": "board_1", "nombre": "Board 1", "tipo": "board"},
-    {"id": "board_2", "nombre": "Board 1", "tipo": "board"},
-    {"id": "board_3", "nombre": "Board 1", "tipo": "board"},
-    {"id": "board_4", "nombre": "Board 1", "tipo": "board"},
-    {"id": "pieces_1", "nombre": "Pieces 1", "tipo": "pieces"},
-    {"id": "pieces_2", "nombre": "Pieces 2", "tipo": "pieces"},
-    {"id": "pieces_3", "nombre": "Pieces 3", "tipo": "pieces"},
-    {"id": "piezas_4", "nombre": "Pieces 4", "tipo": "pieces"},
-    {"id": "clock_1", "nombre": "Digital Clock 1", "tipo": "clock"},
-    {"id": "clock_2", "nombre": "Digital Clock 2", "tipo": "clock"},
-    {"id": "clock_3", "nombre": "Digital Clock 3", "tipo": "clock"},
-    {"id": "clock_0", "nombre": "Analog Clock", "tipo": "clock"}
-
+    {"id": "board_1", "name": "Board 1", "type": "board"},
+    {"id": "board_2", "name": "Board 2", "type": "board"},
+    {"id": "board_3", "name": "Board 3", "type": "board"},
+    {"id": "board_4", "name": "Board 4", "type": "board"},
+    {"id": "pieces_1", "name": "Pieces 1", "type": "pieces"},
+    {"id": "pieces_2", "name": "Pieces 2", "type": "pieces"},
+    {"id": "pieces_3", "name": "Pieces 3", "type": "pieces"},
+    {"id": "pieces_4", "name": "Pieces 4", "type": "pieces"},
+    {"id": "clock_1", "name": "Digital Clock 1", "type": "clock"},
+    {"id": "clock_2", "name": "Digital Clock 2", "type": "clock"},
+    {"id": "clock_3", "name": "Digital Clock 3", "type": "clock"},
+    {"id": "clock_0", "name": "Analog Clock", "type": "clock"}
   ],
 
   "staff": [
     {"id": "fm", "name": "FM Ana Kremlin", "type": "coach"},
-    {"id": "im", "name": "IM Carlos Magnesio ", "type": "coach"},
+    {"id": "im", "name": "IM Carlos Magnesio", "type": "coach"},
     {"id": "gm", "name": "GM Fidel Negracapa", "type": "coach"},
     {"id": "arbiter_1", "name": "Pepe", "type": "arbiter"},
     {"id": "arbiter_2", "name": "Luciano", "type": "arbiter"},
     {"id": "arbiter_3", "name": "Bonifacio", "type": "arbiter"},
-    {"id": "comentator_1", "name": "Rameshbabu Sergeyevski", "type": "comentator"},
-    {"id": "comentator_2", "name": "Irina Pavlovina", "type": "comentator"}
-    
+    {"id": "commentator_1", "name": "Rameshbabu Sergeyevski", "type": "commentator"},
+    {"id": "commentator_2", "name": "Irina Pavlovina", "type": "commentator"}
   ],
 
-  "tipos_evento": [
-    {"id": "torneo", "nombre": "Torneo", "duracion_min": 2},
-    {"id": "clase", "nombre": "Clase", "duracion_min": 1},
-    {"id": "partida", "nombre": "Partida Amistosa", "duracion_min": 0.5},
-    {"id": "analisis", "nombre": "Análisis", "duracion_min": 1},
-    {"id": "simultaneas", "nombre": "Simultáneas", "duracion_min": 1.5}
+  "event_types": [
+    {"id": "tournament", "name": "Tournament", "min_duration": 2},
+    {"id": "class", "name": "Class", "min_duration": 1},
+    {"id": "friendly_match", "name": "Friendly Match", "min_duration": 0.5},
+    {"id": "analysis", "name": "Analysis", "min_duration": 1},
+    {"id": "simultaneous", "name": "Simultaneous", "min_duration": 1.5}
   ],
 
-  "restricciones": [
+  "restrictions": [
     {
-      "tipo": "co_requisito",
-      "nombre": "Torneo requiere Árbitro",
-      "caso": "torneo",
-      "requiere": ["arbitro_1", "arbitro_2", "arbitro_3"],
-      "cantidad_minima": 1
+      "type": "co_requirement",
+      "name": "Tournament requires Arbiter",
+      "case": "tournament",
+      "requires": ["arbiter_1", "arbiter_2", "arbiter_3"],
+      "min_amount": 1
     },
     {
-      "tipo": "co_requisito", 
-      "nombre": "Clase requiere Instructor",
-      "caso": "clase",
-      "requiere": ["fm","im","gm"],
-      "cantidad_minima": 1
+      "type": "co_requirement",
+      "name": "Class requires Instructor",
+      "case": "class",
+      "requires": ["fm","im","gm"],
+      "min_amount": 1
+    },
+  
+    {
+      "type": "co_requirement",
+      "name": "friendly match requires board and pieces",
+      "case": "friendly_match",
+      "requires": ["board_1", "board_2", "board_3", "board_4", "pieces_1", "pieces_2", "pieces_3", "pieces_4"], 
+      "min_amount": 2
     },
     {
-      "tipo": "co_requisito",
-      "nombre": "Partida Amistosa requiere Tablero y Piezas",
-      "caso": "partida",
-      "requiere": ["tablero_1", "tablero_2", "tablero_3", "tablero_4", "piezas_1", "piezas_2", "piezas_3", "piezas_4"],
-      "cantidad_minima": 2
-    },
-    
-    {
-      "tipo": "exclusion",
-      "nombre": "Relojes solo para torneos",
-      "recursos": ["reloj_1", "reloj_2","reloj_3","reloj_0"],
-      "eventos_permitidos": ["torneo"]
+      "type": "exclusion",
+      "name": "Clocks only for tournaments",
+      "resources": ["clock_1", "clock_2","clock_3","clock_0"],
+      "allowed_events": ["tournament"]
     }
   ],
 
-  "eventos": [
+  "events": [
     {
       "id": "ev1",
-      "nombre": "Torneo de Candidatos",
-      "tipo": "torneo",
-      "fecha": "2026-06-15",
-      "hora_inicio": "10:00",
-      "hora_fin": "14:00",
-      "recursos": ["sala_principal", "tablero_1", "tablero_2", "piezas_1", "reloj_1", "arbitro_1"],
-      "participantes": 16
+      "name": "Candidates Tournament",
+      "type": "tournament",
+      "date": "2026-06-15",
+      "start": "10:00",
+      "end": "14:00",
+      "resources": ["main_room", "board_1", "board_2", "pieces_1", "clock_1", "arbiter_1"],
+      "participants": 16
     },
     {
       "id": "ev2",
-      "nombre": "Clase de Aperturas",
-      "tipo": "clase",
-      "fecha": "2026-06-12",
-      "hora_inicio": "17:00",
-      "hora_fin": "19:00",
-      "recursos": ["sala_estudio", "tablero_3", "piezas_2", "proyector", "instructor_1"],
-      "participantes": 6
+      "name": "Opening Class",
+      "type": "class",
+      "date": "2026-06-12",
+      "start": "17:00",
+      "end": "19:00",
+      "resources": ["study_room", "board_3", "pieces_2", "projector", "instructor_1"],
+      "participants": 6
     },
     {
       "id": "ev3",
-      "nombre": "Puzzle Rush",
-      "tipo": "especial",
-      "fecha": "2026-06-18",
-      "hora_inicio": "10:00",
-      "hora_fin": "11:30",
-      "recursos": [],
-      "participantes": 10
+      "name": "Puzzle Rush",
+      "type": "special",
+      "date": "2026-06-18",
+      "start": "10:00",
+      "end": "11:30",
+      "resources": ["projector","commentator_1"],
+      "participants": 25
     },
     {
       "id": "ev4",
-      "nombre": "Simultanea con Maestro",
-      "tipo": "simultanea",
-      "fecha": "2026-06-18",
-      "hora_inicio": "10:00",
-      "hora_fin": "11:30",
-      "recursos": ["gm"],
-      "participantes": 15
+      "name": "Simultaneous with Master",
+      "type": "simultaneous",
+      "date": "2026-06-18",
+      "start": "10:00",
+      "end": "11:30",
+      "resources": ["gm","board_1","board_2","board_3","board_4"],
+      "participants": 4
     }
-
-    
   ],
 
   "config": {
-    "horario_apertura": "09:00",
-    "horario_final": "21:00",
-    "anticipacion_reserva": 7,
-    "duracion_minima": 0.5,
-    "duracion_maxima": 8
+    "opening_time": "09:00",
+    "closing_time": "21:00",
+    "reservation_anticipation": 7,
+    "min_duration": 0.5,
+    "max_duration": 8
   }
 }
