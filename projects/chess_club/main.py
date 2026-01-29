@@ -31,7 +31,6 @@ class Resource:
         self.name = name
         self.type = type
         self.available = available
-        self.scheduled_events = []
         
 class Event:
     def __init__(self,id,name,type,start,end):
@@ -45,9 +44,6 @@ class Event:
         
     def add_resource(self,resource):
         self.resources.append(resource)
-        
-    def collides_with(self,ot_event):
-        return (self.start < ot_event.end and self.end > ot_event.start)
         
     def to_dict(self):
         return {
@@ -130,6 +126,22 @@ class ChessClub:
         if duration < min_duration or duration > max_duration:
             return False, f"Duration must be {min_duration}-{max_duration}h"
         
+        #validate opening and closing times only if existing in config
+        if "opening_time" in self.config and "closing_time" in self.config:
+            try:
+                opening_time = self.config.get("opening_time")
+                closing_time = self.config.get("closing_time")
+                opening_hours, opening_mins = map(int, opening_time.split(":"))
+                closing_hours, closing_mins = map(int, closing_time.split(":"))
+                
+                opening_dt = start.replace(hour=opening_hours, minute=opening_mins, second=0, microsecond=0)
+                closing_dt = start.replace(hour=closing_hours, minute=closing_mins, second=0, microsecond=0)
+                
+                if start < opening_dt or end > closing_dt:
+                    return False, f"Event must be within club hours ({opening_time}-{closing_time})"
+            except (ValueError, AttributeError):
+                return False, "Invalid time format in club configuration"
+        
         temp = Event("temp", name, type, start, end)
         assigned_resources = []
         for resource_id in resources_ids:
@@ -152,14 +164,30 @@ class ChessClub:
         return True, f"Scheduled: {name}"
     
     def find_next_slot(self, duration, resources_ids):
-        """Find next available time slot for given resources."""
+        """Find next available time slot for given resources within club hours."""
         now = datetime.now()
         curr_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
         
+        #get opening and closing hours if available
+        opening_hour = 0
+        closing_hour = 24
+        if "opening_time" in self.config and "closing_time" in self.config:
+            try:
+                opening_time = self.config.get("opening_time")
+                closing_time = self.config.get("closing_time")
+                opening_hours, _ = map(int, opening_time.split(":"))
+                closing_hours, _ = map(int, closing_time.split(":"))
+                opening_hour = opening_hours
+                closing_hour = closing_hours
+            except (ValueError, AttributeError):
+                pass
+        
         for i in range(168):
             end_time = curr_time + timedelta(hours=duration)
-            if all(self.check_available(r, curr_time, end_time) for r in resources_ids):
-                return curr_time
+            # Check if slot is within club hours and resources are available
+            if curr_time.hour >= opening_hour and end_time.hour <= closing_hour:
+                if all(self.check_available(r, curr_time, end_time) for r in resources_ids):
+                    return curr_time
             curr_time += timedelta(hours=1)
         return None
         
@@ -206,7 +234,7 @@ if 'club' not in st.session_state:
 else:
     club = st.session_state.club
 
-#metrics
+#stats
 col1, col2 = st.columns(2)
 col1.write(f"Events: {len(club.events)}")
 col2.write(f"Resources: {len(club.resources)}")
@@ -286,7 +314,7 @@ elif page == "Find Slot":
                 end = slot + timedelta(hours=duration)
                 st.success(f"{slot.strftime('%Y-%m-%d %H:%M')} to {end.strftime('%H:%M')}")
             else:
-                st.warning("No slot in 7 days")
+                st.warning("No slot in next 7 days")
 
 #resources
 elif page == "Resources":
@@ -300,9 +328,9 @@ elif page == "Resources":
                 st.write(f"{r.name}")
                 st.caption(f"{count} events")
 
-#save/load
+#save and load
 elif page == "Save/Load":
-    st.header("Save & Load")
+    st.header("Save/Load")
     col1, col2 = st.columns(2)
     with col1:
         if st.button("Save"):
