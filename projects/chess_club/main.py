@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 import os
 
 def read_json(filename="resources.json"):
+    """Read and parse a JSON file from the chess_club directory."""
     dir = os.path.dirname(os.path.abspath(__file__))
     resource_path = os.path.join(dir, filename)
     try:
@@ -15,7 +16,9 @@ def read_json(filename="resources.json"):
         st.error(f"{filename} file not found")
         return None
 
+
 def write_json(data, filename="resources.json"):
+    """Write data to a JSON file in the chess_club directory."""
     dir = os.path.dirname(os.path.abspath(__file__))
     resource_path = os.path.join(dir, filename)
     with open(resource_path, "w", encoding="utf-8") as f:
@@ -24,16 +27,21 @@ def write_json(data, filename="resources.json"):
 st.set_page_config(page_title="Critical Mass Chess Club", layout="wide")
 st.title("Critical Mass Chess Club")
 
-#classes
+# Classes
 class Resource:
-    def __init__(self,id,name,type,available=True):
+    """Represents a club resource (room, equipment, or staff)."""
+    
+    def __init__(self, id, name, type, available=True):
         self.id = id
         self.name = name
         self.type = type
         self.available = available
-        
+
+
 class Event:
-    def __init__(self,id,name,type,start,end):
+    """Represents a scheduled club event."""
+    
+    def __init__(self, id, name, type, start, end):
         self.id = id
         self.name = name
         self.type = type
@@ -41,11 +49,13 @@ class Event:
         self.end = end
         self.resources = []
         self.state = "scheduled"
-        
-    def add_resource(self,resource):
+    
+    def add_resource(self, resource):
+        """Add a resource to this event."""
         self.resources.append(resource)
-        
+    
     def to_dict(self):
+        """Convert event to dictionary for JSON serialization."""
         return {
             "id": self.id,
             "name": self.name,
@@ -57,6 +67,8 @@ class Event:
         }
         
 class ChessClub:
+    """Main class for managing chess club events and resources."""
+    
     def __init__(self):
         self.resources = []
         self.events = []
@@ -101,9 +113,9 @@ class ChessClub:
                 if restriction.get("case") == event.type:
                     resources_event_ids = [i.id for i in event.resources]
                     requires = restriction.get("requires", [])
-                    minimum_amount = restriction.get("minimum_amount", 1)
+                    min_amount = restriction.get("min_amount", 1)
                     count = sum(1 for req in requires if req in resources_event_ids)
-                    if count < minimum_amount:
+                    if count < min_amount:
                         return False, f"Missing required resource(s) for {event.type}"
         
         for restriction in self.restrictions:
@@ -119,6 +131,11 @@ class ChessClub:
         """Schedule a new event with the given parameters and resources."""
         if end <= start:
             return False, "Invalid time: end must be after start"
+        
+        # Validate resources exist
+        for resource_id in resources_ids:
+            if not self.search_resource(resource_id):
+                return False, f"Resource '{resource_id}' does not exist"
         
         duration = (end-start).total_seconds() / 3600
         min_duration = self.config.get("min_duration", 0.5)
@@ -146,7 +163,9 @@ class ChessClub:
         assigned_resources = []
         for resource_id in resources_ids:
             if not self.check_available(resource_id, start, end):
-                return False, "A resource is unavailable"
+                resource = self.search_resource(resource_id)
+                resource_name = resource.name if resource else resource_id
+                return False, f"Resource '{resource_name}' is not available at this time"
             resource = self.search_resource(resource_id)
             if resource:
                 assigned_resources.append(resource)
@@ -168,24 +187,29 @@ class ChessClub:
         now = datetime.now()
         curr_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
         
-        #get opening and closing hours if available
+        # Get opening and closing hours if available
         opening_hour = 0
         closing_hour = 24
         if "opening_time" in self.config and "closing_time" in self.config:
             try:
                 opening_time = self.config.get("opening_time")
                 closing_time = self.config.get("closing_time")
-                opening_hours, _ = map(int, opening_time.split(":"))
-                closing_hours, _ = map(int, closing_time.split(":"))
+                opening_hours, opening_mins = map(int, opening_time.split(":"))
+                closing_hours, closing_mins = map(int, closing_time.split(":"))
                 opening_hour = opening_hours
                 closing_hour = closing_hours
             except (ValueError, AttributeError):
                 pass
         
-        for i in range(168):
+        for i in range(168):  # Check next 7 days
             end_time = curr_time + timedelta(hours=duration)
+            
+            # Create datetime objects for opening and closing times on this day
+            opening_dt = curr_time.replace(hour=opening_hour, minute=0, second=0, microsecond=0)
+            closing_dt = curr_time.replace(hour=closing_hour, minute=0, second=0, microsecond=0)
+            
             # Check if slot is within club hours and resources are available
-            if curr_time.hour >= opening_hour and end_time.hour <= closing_hour:
+            if curr_time >= opening_dt and end_time <= closing_dt:
                 if all(self.check_available(r, curr_time, end_time) for r in resources_ids):
                     return curr_time
             curr_time += timedelta(hours=1)
