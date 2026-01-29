@@ -1,2 +1,5 @@
 projects/prime_age.py
 projects/chess_club/app.py
+__pycache__/
+*.pyc
+*.pyo
