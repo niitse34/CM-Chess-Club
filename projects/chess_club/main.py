@@ -63,14 +63,14 @@ class ChessClub:
         self.restrictions = []
         
     def search_resource(self, resource_id: str) -> "Resource | None":
-        """Find a resource by its ID."""
+        #search resource by id
         for resource in self.resources:
             if resource.id == resource_id:
                 return resource
         return None
     
     def check_available(self, resource_id: str, start: datetime, end: datetime) -> bool:
-        """Check if a resource is available for the given time period."""
+        #check resource availability
         resource = self.search_resource(resource_id)
         if not resource:
             return False
@@ -95,16 +95,21 @@ class ChessClub:
         self.config = data.get("config",{})
         
     def validate_restrictions(self, event):
-        """Validate co-requirements and exclusions for an event."""
+        #validate co-requirements and exclusions for an event
         for restriction in self.restrictions:
             if restriction["type"] == "co_requirement":
                 if restriction.get("case") == event.type:
                     resources_event_ids = [i.id for i in event.resources]
                     requires = restriction.get("requires", [])
-                    minimum_amount = restriction.get("minimum_amount", 1)
+                    minimum_amount = restriction.get("min_amount", 1)
                     count = sum(1 for req in requires if req in resources_event_ids)
                     if count < minimum_amount:
-                        return False, f"Missing required resource(s) for {event.type}"
+                        missing = [r for r in requires if r not in resources_event_ids]
+                        missing_ids = []
+                        for r in missing:
+                            res = self.search_resource(r)
+                            missing_ids.append(res.name if res else r)
+                        return False, f"Missing required resources for {event.type}: {', '.join(missing_ids)}"
         
         for restriction in self.restrictions:
             if restriction["type"] == "exclusion":
@@ -116,7 +121,7 @@ class ChessClub:
         return True, "Valid"
         
     def schedule_event(self, name: str, type: str, start: datetime, end: datetime, resources_ids: list) -> tuple[bool, str]:
-        """Schedule a new event with the given parameters and resources."""
+        #schedule new event
         if end <= start:
             return False, "Invalid time: end must be after start"
         
@@ -144,13 +149,20 @@ class ChessClub:
         
         temp = Event("temp", name, type, start, end)
         assigned_resources = []
+        unavailable = []
+        
         for resource_id in resources_ids:
-            if not self.check_available(resource_id, start, end):
-                return False, "A resource is unavailable"
             resource = self.search_resource(resource_id)
-            if resource:
-                assigned_resources.append(resource)
-                temp.add_resource(resource)
+            if not resource:
+                unavailable.append(f"{resource_id} (not found)")
+                continue
+            if not self.check_available(resource_id, start, end):
+                unavailable.append(resource.name)
+                continue
+            assigned_resources.append(resource)
+            temp.add_resource(resource)
+        if unavailable:
+            return False, "Unavailable or missing: " + ", ".join(unavailable)
         
         valid, message = self.validate_restrictions(temp)
         if not valid:
@@ -158,13 +170,14 @@ class ChessClub:
         
         event_id = f"event_{int(datetime.now().timestamp())}"
         event = Event(event_id, name, type, start, end)
+        
         for resource in assigned_resources:
             event.add_resource(resource)
         self.events.append(event)
         return True, f"Scheduled: {name}"
     
     def find_next_slot(self, duration, resources_ids):
-        """Find next available time slot for given resources within club hours."""
+        #find next available time slot for given resources"
         now = datetime.now()
         curr_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
         
@@ -264,8 +277,15 @@ if page == "Events":
 #add event
 elif page == "Add Event":
     st.header("Schedule Event")
+    # Show scheduling message if present
+    if "schedule_msg" in st.session_state:
+        msg, msg_type = st.session_state.pop("schedule_msg")
+        if msg_type == "success":
+            st.success(msg)
+        else:
+            st.error(msg)
     name = st.text_input("Name")
-    type = st.selectbox("Type", list(club.event_types.keys()) if club.event_types else [])
+    event_type = st.selectbox("Type", list(club.event_types.keys()) if club.event_types else [])
     date = st.date_input("Date")
     hour = st.number_input("Hour", 9, 20, 14)
     duration = st.number_input("Duration (h)", 0.5, 8.0, 2.0, step=0.5)
@@ -279,18 +299,20 @@ elif page == "Add Event":
                 selected.append(r.id)
     
     if st.button("Schedule"):
-        if not name or not type or not selected:
-            st.error("Fill all fields")
+        if not name or not event_type or not selected:
+            st.session_state["schedule_msg"] = ("Fill missing fields", "error")
+            st.rerun()
         else:
             start = datetime.combine(date, datetime.min.time().replace(hour=int(hour)))
             end = start + timedelta(hours=duration)
-            ok, msg = club.schedule_event(name, type, start, end, selected)
+            ok, msg = club.schedule_event(name, event_type, start, end, selected)
             if ok:
                 club.save_file()
-                st.success(msg)
+                st.session_state["schedule_msg"] = (msg, "success")
                 st.rerun()
             else:
-                st.error(msg)
+                st.session_state["schedule_msg"] = (msg, "error")
+                st.rerun()
 
 #find slot
 elif page == "Find Slot":

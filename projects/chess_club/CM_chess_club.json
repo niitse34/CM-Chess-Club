@@ -1,14 +1,14 @@
 {
     "events": [
         {
-            "id": "event_1769667698",
-            "name": "xz",
+            "id": "event_1769722907",
+            "name": "asd",
             "type": "friendly_match",
-            "start": "2026-01-29T09:00:00",
-            "end": "2026-01-29T11:00:00",
+            "start": "2026-01-29T14:00:00",
+            "end": "2026-01-29T16:00:00",
             "resources": [
-                "board_4",
-                "pieces_2"
+                "board_2",
+                "pieces_4"
             ],
             "state": "scheduled"
         }

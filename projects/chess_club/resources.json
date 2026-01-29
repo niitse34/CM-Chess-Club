@@ -56,10 +56,24 @@
     },
     {
       "type": "co_requirement",
-      "name": "Team Match requires minimum 4 boards, clocks, and arbiter",
+      "name": "Team Match requires at least one board",
       "case": "team_match",
-      "requires": ["board_1", "board_2", "board_3", "board_4", "clock_1", "arbiter_1", "arbiter_2", "arbiter_3"],
-      "min_amount": 6
+      "requires": ["board_1", "board_2", "board_3", "board_4"],
+      "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
+      "name": "Team Match requires at least one clock",
+      "case": "team_match",
+      "requires": ["clock_1", "clock_2", "clock_3", "clock_0"],
+      "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
+      "name": "Team Match requires at least one arbiter",
+      "case": "team_match",
+      "requires": ["arbiter_1", "arbiter_2", "arbiter_3"],
+      "min_amount": 1
     },
     {
       "type": "co_requirement",
