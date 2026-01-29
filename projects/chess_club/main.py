@@ -104,7 +104,7 @@ class ChessClub:
             self.resources.append(Resource(person["id"], person["name"], "staff"))
         self.restrictions = data.get("restrictions", [])
         self.event_types = {type["id"]: type for type in data.get("event_types", [])}
-        self.config = data.get("config",{})
+        self.config = data.get("config", {})
         
     def validate_restrictions(self, event):
         """Validate co-requirements and exclusions for an event."""
@@ -137,13 +137,13 @@ class ChessClub:
             if not self.search_resource(resource_id):
                 return False, f"Resource '{resource_id}' does not exist"
         
-        duration = (end-start).total_seconds() / 3600
+        duration = (end - start).total_seconds() / 3600
         min_duration = self.config.get("min_duration", 0.5)
         max_duration = self.config.get("max_duration", 8.0)
         if duration < min_duration or duration > max_duration:
             return False, f"Duration must be {min_duration}-{max_duration}h"
         
-        #validate opening and closing times only if existing in config
+        # Validate opening and closing times only if existing in config
         if "opening_time" in self.config and "closing_time" in self.config:
             try:
                 opening_time = self.config.get("opening_time")
@@ -189,15 +189,15 @@ class ChessClub:
         
         # Get opening and closing hours if available
         opening_hour = 0
+        opening_min = 0
         closing_hour = 24
+        closing_min = 0
         if "opening_time" in self.config and "closing_time" in self.config:
             try:
                 opening_time = self.config.get("opening_time")
                 closing_time = self.config.get("closing_time")
-                opening_hours, opening_mins = map(int, opening_time.split(":"))
-                closing_hours, closing_mins = map(int, closing_time.split(":"))
-                opening_hour = opening_hours
-                closing_hour = closing_hours
+                opening_hour, opening_min = map(int, opening_time.split(":"))
+                closing_hour, closing_min = map(int, closing_time.split(":"))
             except (ValueError, AttributeError):
                 pass
         
@@ -205,8 +205,8 @@ class ChessClub:
             end_time = curr_time + timedelta(hours=duration)
             
             # Create datetime objects for opening and closing times on this day
-            opening_dt = curr_time.replace(hour=opening_hour, minute=0, second=0, microsecond=0)
-            closing_dt = curr_time.replace(hour=closing_hour, minute=0, second=0, microsecond=0)
+            opening_dt = curr_time.replace(hour=opening_hour, minute=opening_min, second=0, microsecond=0)
+            closing_dt = curr_time.replace(hour=closing_hour, minute=closing_min, second=0, microsecond=0)
             
             # Check if slot is within club hours and resources are available
             if curr_time >= opening_dt and end_time <= closing_dt:
