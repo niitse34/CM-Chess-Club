@@ -204,6 +204,11 @@ class ChessClub:
         for i in range(168):  # Check next 7 days
             end_time = curr_time + timedelta(hours=duration)
             
+            # Skip if event spans multiple days (crosses midnight)
+            if curr_time.date() != end_time.date():
+                curr_time += timedelta(hours=1)
+                continue
+            
             # Create datetime objects for opening and closing times on this day
             opening_dt = curr_time.replace(hour=opening_hour, minute=opening_min, second=0, microsecond=0)
             closing_dt = curr_time.replace(hour=closing_hour, minute=closing_min, second=0, microsecond=0)

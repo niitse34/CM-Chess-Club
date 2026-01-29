@@ -368,6 +368,18 @@ class TestChessClub(unittest.TestCase):
             end_time = slot + timedelta(hours=duration)
             self.assertGreaterEqual(slot.hour, 9)
             self.assertLessEqual(end_time.hour, 21)
+    
+    def test_find_next_slot_no_midnight_crossing(self):
+        """Test that find_next_slot doesn't return slots that cross midnight"""
+        duration = 8.0  # Long duration
+        resources = ["board_1"]
+        
+        slot = self.club.find_next_slot(duration, resources)
+        
+        if slot:
+            end_time = slot + timedelta(hours=duration)
+            # Should be on the same day
+            self.assertEqual(slot.date(), end_time.date())
 
 
 class TestChessClubFileOperations(unittest.TestCase):
