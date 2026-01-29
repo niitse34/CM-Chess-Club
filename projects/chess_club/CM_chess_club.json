@@ -1,0 +1,16 @@
+{
+    "events": [
+        {
+            "id": "event_1769667698",
+            "name": "xz",
+            "type": "friendly_match",
+            "start": "2026-01-29T09:00:00",
+            "end": "2026-01-29T11:00:00",
+            "resources": [
+                "board_4",
+                "pieces_2"
+            ],
+            "state": "scheduled"
+        }
+    ]
+}

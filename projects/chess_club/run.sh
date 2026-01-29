@@ -1,1 +1,2 @@
-streamlit main.py
+#!/bin/bash
+streamlit run main.py

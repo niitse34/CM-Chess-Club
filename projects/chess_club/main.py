@@ -21,15 +21,10 @@ def write_json(data, filename="resources.json"):
     with open(resource_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
-st.set_page_config(
-    page_title = "Critical Mass Chess Club"
-)
-
-# main title
+st.set_page_config(page_title="Critical Mass Chess Club", layout="wide")
 st.title("Critical Mass Chess Club")
 
-# classes
-
+#classes
 class Resource:
     def __init__(self,id,name,type,available=True):
         self.id = id
@@ -71,11 +66,15 @@ class ChessClub:
         self.events = []
         self.restrictions = []
         
-    def search_resource(self,resource_id):
+    def search_resource(self, resource_id: str) -> "Resource | None":
+        """Find a resource by its ID."""
         for resource in self.resources:
             if resource.id == resource_id:
                 return resource
-    def check_available(self,resource_id,start,end):
+        return None
+    
+    def check_available(self, resource_id: str, start: datetime, end: datetime) -> bool:
+        """Check if a resource is available for the given time period."""
         resource = self.search_resource(resource_id)
         if not resource:
             return False
@@ -85,185 +84,232 @@ class ChessClub:
                     return False
         return True
     
-    def get_event_start(self,event):
-        return event.start
-    
-    
-    #load data from resources.json
     def load_initial_data(self):
         data = read_json("resources.json")
         if not data:
             return None
-        # rooms
         for room in data.get("rooms", []):
-            self.resources.append(Resource(
-                id=room["id"],
-                name=room["name"],
-                type="room",
-                available=True
-            ))
-        # equipment
+            self.resources.append(Resource(room["id"], room["name"], "room"))
         for equip in data.get("equipment", []):
-            self.resources.append(Resource(
-                id = equip["id"],
-                name = equip["name"],
-                type="equipment",
-                available=True
-            ))
-        # staff
+            self.resources.append(Resource(equip["id"], equip["name"], "equipment"))
         for person in data.get("staff", []):
-            self.resources.append(Resource(
-                id = person["id"],
-                name = person["name"],
-                type="staff",
-                available=True
-            ))
-        # load restrictions from json
+            self.resources.append(Resource(person["id"], person["name"], "staff"))
         self.restrictions = data.get("restrictions", [])
-        
-        #load types
-        self.event_types= {type["id"]: type for type in data.get["event_types", []]}
-
-        #load config
+        self.event_types = {type["id"]: type for type in data.get("event_types", [])}
         self.config = data.get("config",{})
         
-        
-    def validate_restrictions(self,event):
-        #check mutuazl requirements
+    def validate_restrictions(self, event):
+        """Validate co-requirements and exclusions for an event."""
         for restriction in self.restrictions:
-            if restriction["type"] == "mut_requirement":
-                #check if restriction applies
+            if restriction["type"] == "co_requirement":
                 if restriction.get("case") == event.type:
                     resources_event_ids = [i.id for i in event.resources]
                     requires = restriction.get("requires", [])
-                    minimum_amount = restriction.get("minimum_amount",1)
-                    if event.type == "match":
-                        has_board = any(r.startswith("board_") for r in resources_event_ids)
-                        has_pieces = any(r.startswith("pieces_") for r in resources_event_ids)
-                        if not (has_board and has_pieces):
-                            return False, "missing board and/or pieces for the match"
-        #check exclusions
+                    minimum_amount = restriction.get("minimum_amount", 1)
+                    count = sum(1 for req in requires if req in resources_event_ids)
+                    if count < minimum_amount:
+                        return False, f"Missing required resource(s) for {event.type}"
+        
         for restriction in self.restrictions:
             if restriction["type"] == "exclusion":
                 affected_resources = restriction.get("resources", [])
                 allowed_events = restriction.get("allowed_events", [])
-                #if event uses affected resources and is not in allowed events
                 if any(r.id in affected_resources for r in event.resources):
                     if event.type not in allowed_events:
-                        return False, f"restricted resource"
-        return True, "restrictions validated"
+                        return False, restriction.get('name', 'Resource restriction failed')
+        return True, "Valid"
         
-    def schedule_event(self,name,type,start,end,resources_ids):
-        #check valid duration
+    def schedule_event(self, name: str, type: str, start: datetime, end: datetime, resources_ids: list) -> tuple[bool, str]:
+        """Schedule a new event with the given parameters and resources."""
         if end <= start:
-            return False, "end time must be after start time"
-            
-        #calculate duration (hours)
+            return False, "Invalid time: end must be after start"
+        
         duration = (end-start).total_seconds() / 3600
-            
-        #validate min and max durations
-            
         min_duration = self.config.get("min_duration", 0.5)
         max_duration = self.config.get("max_duration", 8.0)
         if duration < min_duration or duration > max_duration:
-            return False, f"duration must be between {min_duration} and {max_duration} hours"
-          
-        #event type validation
-            
-        if type in self.event_types:
-            expected_duration = self.event_types[type].get("duration", 0)
-            if expected_duration > 0 and duration < expected_duration:
-                return False, f"{type} type requires at least {expected_duration} hours"
-                
-        #validations event
-            
+            return False, f"Duration must be {min_duration}-{max_duration}h"
+        
         temp = Event("temp", name, type, start, end)
-            
-        #check availability
         assigned_resources = []
         for resource_id in resources_ids:
-            if not self.check_available(resource_id,start,end):
-                resource = self.search_resource(resource_id)
-                return False,f"resource not available"
-            resource = self.search_resource(resource_id),
+            if not self.check_available(resource_id, start, end):
+                return False, "A resource is unavailable"
+            resource = self.search_resource(resource_id)
             if resource:
                 assigned_resources.append(resource)
                 temp.add_resource(resource)
-                    
-        #validate restrictions
-            
+        
         valid, message = self.validate_restrictions(temp)
         if not valid:
             return False, message
-            
-        #create event
-            
-        event_id = f"event" #########
+        
+        event_id = f"event_{int(datetime.now().timestamp())}"
         event = Event(event_id, name, type, start, end)
         for resource in assigned_resources:
             event.add_resource(resource)
-                
         self.events.append(event)
-        return True, f"{name} event successfully scheduled"
-        
-    def search_next_space(self,duration,resources_ids):
+        return True, f"Scheduled: {name}"
+    
+    def find_next_slot(self, duration, resources_ids):
+        """Find next available time slot for given resources."""
         now = datetime.now()
-            
-        #start next hour
-        curr_time = now.replace(minute=0,second=0,microsecond=0) + timedelta(hours=1)
-            
-        #search in following 7 days
-        for i in range(168): #7 days in hours
-            recom_end = curr_time + timedelta(hours=duration)
-                
-            #verify availability for every resource
-            all_available = all(
-                self.check_available(r,curr_time,recom_end)
-                for r in resources_ids
-            )
-                
-            if all_available:
+        curr_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
+        
+        for i in range(168):
+            end_time = curr_time + timedelta(hours=duration)
+            if all(self.check_available(r, curr_time, end_time) for r in resources_ids):
                 return curr_time
             curr_time += timedelta(hours=1)
-                
-    def delete_event(self, event_id):
+        return None
+        
+    def delete_event(self, event_id: str) -> bool:
+        """Delete an event by its ID."""
         for i, event in enumerate(self.events):
             if event.id == event_id:
                 del self.events[i]
                 return True
-            return False
-        
+        return False
+    
     def save_file(self, filename="CM_chess_club.json"):
-        # Save only the events, matching the structure of resources.json, using write_json
-        data = {
-            "events": [event.to_dict() for event in self.events]
-        }
-        write_json(data, filename)
+        data = {"events": [event.to_dict() for event in self.events]}
+        dir = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(dir, filename)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(data, f, indent=4)
         
     def load_file(self, filename="CM_chess_club.json"):
+        dir = os.path.dirname(os.path.abspath(__file__))
+        path = os.path.join(dir, filename)
+        if not os.path.exists(path):
+            return
         data = read_json(filename)
         if not data:
-            return None
-        
-        #load events
-        self.events= []
+            return
+        self.events = []
         for event_data in data.get("events", []):
-            start = datetime.fromisoformat(event_data["start"])
-            end = datetime.fromisoformat(event_data["end"])
-            event = Event(
-                id=event_data["id"],
-                name=event_data["name"],
-                type=event_data["type"],
-                start=start,
-                end=end
-            )
-            #assign resources
+            event = Event(event_data["id"], event_data["name"], event_data["type"],
+                         datetime.fromisoformat(event_data["start"]),
+                         datetime.fromisoformat(event_data["end"]))
             for resource_id in event_data.get("resources", []):
                 resource = self.search_resource(resource_id)
                 if resource:
                     event.add_resource(resource)
-            event.state = event_data.get("state", "scheduled")
             self.events.append(event)
+
+#initialize
+if 'club' not in st.session_state:
+    club = ChessClub()
+    club.load_initial_data()
+    club.load_file()
+    st.session_state.club = club
+else:
+    club = st.session_state.club
+
+#metrics
+col1, col2 = st.columns(2)
+col1.write(f"Events: {len(club.events)}")
+col2.write(f"Resources: {len(club.resources)}")
+
+#navigation
+page = st.selectbox("Menu", ["Events", "Add Event", "Find Slot", "Resources", "Save/Load"])
+
+#events
+if page == "Events":
+    st.header("Events")
+    if not club.events:
+        st.write("No events")
+    else:
+        filter_date = st.date_input("Filter by date", value=None)
+        events = club.events if not filter_date else [e for e in club.events if e.start.date() == filter_date]
+        
+        for event in sorted(events, key=lambda e: e.start):
+            col1, col2, col3 = st.columns([2, 1, 1])
+            col1.write(f"{event.name} ({event.type})")
+            col2.write(f"{event.start.strftime('%m-%d %H:%M')}")
+            col3.write(f"{len(event.resources)} res")
+            if st.button("Delete", key=f"del_{event.id}"):
+                club.delete_event(event.id)
+                club.save_file()
+                st.rerun()
+
+#add event
+elif page == "Add Event":
+    st.header("Schedule Event")
+    name = st.text_input("Name")
+    type = st.selectbox("Type", list(club.event_types.keys()) if club.event_types else [])
+    date = st.date_input("Date")
+    hour = st.number_input("Hour", 9, 20, 14)
+    duration = st.number_input("Duration (h)", 0.5, 8.0, 2.0, step=0.5)
     
+    st.write("Resources:")
+    cols = st.columns(3)
+    selected = []
+    for i, r in enumerate(club.resources):
+        with cols[i % 3]:
+            if st.checkbox(r.name, key=f"res_{r.id}"):
+                selected.append(r.id)
     
-          
+    if st.button("Schedule"):
+        if not name or not type or not selected:
+            st.error("Fill all fields")
+        else:
+            start = datetime.combine(date, datetime.min.time().replace(hour=int(hour)))
+            end = start + timedelta(hours=duration)
+            ok, msg = club.schedule_event(name, type, start, end, selected)
+            if ok:
+                club.save_file()
+                st.success(msg)
+                st.rerun()
+            else:
+                st.error(msg)
+
+#find slot
+elif page == "Find Slot":
+    st.header("Find Slot")
+    duration = st.number_input("Duration (h)", 0.5, 8.0, 2.0, step=0.5)
+    
+    st.write("Resources:")
+    cols = st.columns(3)
+    selected = []
+    for i, r in enumerate(club.resources):
+        with cols[i % 3]:
+            if st.checkbox(r.name, key=f"find_{r.id}"):
+                selected.append(r.id)
+    
+    if st.button("Search"):
+        if not selected:
+            st.error("Select resources")
+        else:
+            slot = club.find_next_slot(duration, selected)
+            if slot:
+                end = slot + timedelta(hours=duration)
+                st.success(f"{slot.strftime('%Y-%m-%d %H:%M')} to {end.strftime('%H:%M')}")
+            else:
+                st.warning("No slot in 7 days")
+
+#resources
+elif page == "Resources":
+    st.header("Resources")
+    for type_name in set([r.type for r in club.resources]):
+        st.subheader(type_name)
+        cols = st.columns(3)
+        for i, r in enumerate([x for x in club.resources if x.type == type_name]):
+            with cols[i % 3]:
+                count = len([e for e in club.events if r in e.resources])
+                st.write(f"{r.name}")
+                st.caption(f"{count} events")
+
+#save/load
+elif page == "Save/Load":
+    st.header("Save & Load")
+    col1, col2 = st.columns(2)
+    with col1:
+        if st.button("Save"):
+            club.save_file()
+            st.success("Saved")
+    with col2:
+        if st.button("Reload"):
+            club.load_file()
+            st.success("Reloaded")
+

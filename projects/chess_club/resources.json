@@ -33,6 +33,7 @@
   "event_types": [
     {"id": "tournament", "name": "Tournament", "min_duration": 2},
     {"id": "class", "name": "Class", "min_duration": 1},
+    {"id": "team_match", "name": "Team Match", "min_duration": 1.5},
     {"id": "friendly_match", "name": "Friendly Match", "min_duration": 0.5},
     {"id": "analysis", "name": "Analysis", "min_duration": 1},
     {"id": "simultaneous", "name": "Simultaneous", "min_duration": 1.5}
@@ -53,19 +54,44 @@
       "requires": ["fm","im","gm"],
       "min_amount": 1
     },
-  
     {
       "type": "co_requirement",
-      "name": "friendly match requires board and pieces",
+      "name": "Team Match requires minimum 4 boards, clocks, and arbiter",
+      "case": "team_match",
+      "requires": ["board_1", "board_2", "board_3", "board_4", "clock_1", "arbiter_1", "arbiter_2", "arbiter_3"],
+      "min_amount": 6
+    },
+    {
+      "type": "co_requirement",
+      "name": "Friendly match requires at least one board",
       "case": "friendly_match",
-      "requires": ["board_1", "board_2", "board_3", "board_4", "pieces_1", "pieces_2", "pieces_3", "pieces_4"], 
-      "min_amount": 2
+      "requires": ["board_1", "board_2", "board_3", "board_4"],
+      "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
+      "name": "Friendly match requires at least one pieces set",
+      "case": "friendly_match",
+      "requires": ["pieces_1", "pieces_2", "pieces_3", "pieces_4"],
+      "min_amount": 1
     },
     {
       "type": "exclusion",
-      "name": "Clocks only for tournaments",
+      "name": "Clocks only for tournaments and team matches",
       "resources": ["clock_1", "clock_2","clock_3","clock_0"],
-      "allowed_events": ["tournament"]
+      "allowed_events": ["tournament", "team_match"]
+    },
+    {
+      "type": "exclusion",
+      "name": "Main Hall reserved for team matches only",
+      "resources": ["main_room"],
+      "allowed_events": ["tournament", "team_match"]
+    },
+    {
+      "type": "exclusion",
+      "name": "Commentators only for classes and team matches",
+      "resources": ["commentator_1", "commentator_2"],
+      "allowed_events": ["class", "team_match"]
     }
   ],
 
