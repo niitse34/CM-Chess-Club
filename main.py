@@ -26,11 +26,10 @@ st.title("Critical Mass Chess Club")
 
 #classes
 class Resource:
-    def __init__(self,id,name,type,available=True):
+    def __init__(self,id,name,type):
         self.id = id
         self.name = name
         self.type = type
-        self.available = available
         
 class Event:
     def __init__(self,id,name,type,start,end):
@@ -40,7 +39,6 @@ class Event:
         self.start = start
         self.end = end
         self.resources = []
-        self.state = "scheduled"
         
     def add_resource(self,resource):
         self.resources.append(resource)
@@ -52,8 +50,7 @@ class Event:
             "type": self.type,
             "start": self.start.isoformat(),
             "end": self.end.isoformat(),
-            "resources": [i.id for i in self.resources],
-            "state": self.state
+            "resources": [i.id for i in self.resources]
         }
         
 class ChessClub:
@@ -177,30 +174,38 @@ class ChessClub:
         return True, f"Scheduled: {name}"
     
     def find_next_slot(self, duration, resources_ids):
-        #find next available time slot for given resources"
+        #find next available time slot for given resources
         now = datetime.now()
         curr_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
         
-        #get opening and closing hours if available
-        opening_hour = 0
-        closing_hour = 24
-        if "opening_time" in self.config and "closing_time" in self.config:
-            try:
-                opening_time = self.config.get("opening_time")
-                closing_time = self.config.get("closing_time")
-                opening_hours, _ = map(int, opening_time.split(":"))
-                closing_hours, _ = map(int, closing_time.split(":"))
-                opening_hour = opening_hours
-                closing_hour = closing_hours
-            except (ValueError, AttributeError):
-                pass
+        #get opening and closing times
+        opening_time = self.config.get("opening_time", "00:00")
+        closing_time = self.config.get("closing_time", "24:00")
+        try:
+            opening_hours, opening_mins = map(int, opening_time.split(":"))
+            closing_hours, closing_mins = map(int, closing_time.split(":"))
+        except (ValueError, AttributeError):
+            return None
         
         for i in range(168):
             end_time = curr_time + timedelta(hours=duration)
-            # Check if slot is within club hours and resources are available
-            if curr_time.hour >= opening_hour and end_time.hour <= closing_hour:
+            opening_dt = curr_time.replace(hour=opening_hours, minute=opening_mins, second=0, microsecond=0)
+            closing_dt = curr_time.replace(hour=closing_hours, minute=closing_mins, second=0, microsecond=0)
+            
+            #check if slot is within club hours and resources are available
+            
+            if curr_time >= opening_dt and end_time <= closing_dt:
                 if all(self.check_available(r, curr_time, end_time) for r in resources_ids):
-                    return curr_time
+                     #validate restrictions for potential event
+                    
+                    temp = Event("temp", "", "", curr_time, end_time)
+                    for resource_id in resources_ids:
+                        resource = self.search_resource(resource_id)
+                        if resource:
+                            temp.add_resource(resource)
+                    valid, _ = self.validate_restrictions(temp)
+                    if valid:
+                        return curr_time
             curr_time += timedelta(hours=1)
         return None
         
@@ -286,7 +291,8 @@ elif page == "Add Event":
             st.error(msg)
     name = st.text_input("Name")
     event_type = st.selectbox("Type", list(club.event_types.keys()) if club.event_types else [])
-    date = st.date_input("Date")
+    tomorrow = datetime.now().date() + timedelta(days=1)
+    date = st.date_input("Date", value=tomorrow)
     hour = st.number_input("Hour", 9, 20, 14)
     duration = st.number_input("Duration (h)", 0.5, 8.0, 2.0, step=0.5)
     
@@ -299,8 +305,12 @@ elif page == "Add Event":
                 selected.append(r.id)
     
     if st.button("Schedule"):
+        today = datetime.now().date()
         if not name or not event_type or not selected:
             st.session_state["schedule_msg"] = ("Fill missing fields", "error")
+            st.rerun()
+        elif date <= today:
+            st.session_state["schedule_msg"] = ("events can only be scheduled from tomorrow", "error")
             st.rerun()
         else:
             start = datetime.combine(date, datetime.min.time().replace(hour=int(hour)))

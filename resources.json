@@ -1,7 +1,7 @@
 {
   "rooms": [
-    {"id": "main_room", "name": "Main Room", "capacity": 20},
-    {"id": "study_room", "name": "Study Room", "capacity": 8}
+    {"id": "main_room", "name": "Main Room"},
+    {"id": "study_room", "name": "Study Room"}
   ],
 
   "equipment":  [
@@ -33,10 +33,10 @@
   "event_types": [
     {"id": "tournament", "name": "Tournament", "min_duration": 2},
     {"id": "class", "name": "Class", "min_duration": 1},
-    {"id": "team_match", "name": "Team Match", "min_duration": 1.5},
-    {"id": "friendly_match", "name": "Friendly Match", "min_duration": 0.5},
-    {"id": "analysis", "name": "Analysis", "min_duration": 1},
-    {"id": "simultaneous", "name": "Simultaneous", "min_duration": 1.5}
+    {"id": "team_match", "name": "Team Match", "min_duration": 0.3},
+    {"id": "friendly_match", "name": "Friendly Match", "min_duration": 0.2},
+    {"id": "analysis", "name": "Analysis", "min_duration": 0.5},
+    {"id": "simultaneous", "name": "Simultaneous", "min_duration": 1}
   ],
 
   "restrictions": [
@@ -53,6 +53,13 @@
       "case": "class",
       "requires": ["fm","im","gm"],
       "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
+      "name": "Class requires Board and Pieces",
+      "case": "class",
+      "requires": ["board_1", "board_2", "board_3", "board_4", "pieces_1", "pieces_2", "pieces_3", "pieces_4"],
+      "min_amount": 2
     },
     {
       "type": "co_requirement",
@@ -84,10 +91,17 @@
     },
     {
       "type": "co_requirement",
-      "name": "Friendly match requires at least one pieces set",
-      "case": "friendly_match",
-      "requires": ["pieces_1", "pieces_2", "pieces_3", "pieces_4"],
+      "name": "Simultaneous requires Coach",
+      "case": "simultaneous",
+      "requires": ["fm","im","gm"],
       "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
+      "name": "Simultaneous requires Boards",
+      "case": "simultaneous",
+      "requires": ["board_1", "board_2", "board_3", "board_4"],
+      "min_amount": 2
     },
     {
       "type": "exclusion",
@@ -97,29 +111,19 @@
     },
     {
       "type": "exclusion",
-      "name": "Main Hall reserved for team matches only",
+      "name": "Main Hall reserved for tournaments, team matches and simultaneous",
       "resources": ["main_room"],
-      "allowed_events": ["tournament", "team_match"]
+      "allowed_events": ["tournament", "team_match", "simultaneous"]
     },
     {
       "type": "exclusion",
-      "name": "Commentators only for classes and team matches",
+      "name": "Commentators for classes, team matches and simultaneous",
       "resources": ["commentator_1", "commentator_2"],
-      "allowed_events": ["class", "team_match"]
+      "allowed_events": ["class", "team_match", "simultaneous"]
     }
   ],
 
   "events": [
-    {
-      "id": "ev1",
-      "name": "Candidates Tournament",
-      "type": "tournament",
-      "date": "2026-06-15",
-      "start": "10:00",
-      "end": "14:00",
-      "resources": ["main_room", "board_1", "board_2", "pieces_1", "clock_1", "arbiter_1"],
-      "participants": 16
-    },
     {
       "id": "ev2",
       "name": "Opening Class",
@@ -127,18 +131,16 @@
       "date": "2026-06-12",
       "start": "17:00",
       "end": "19:00",
-      "resources": ["study_room", "board_3", "pieces_2", "projector", "instructor_1"],
-      "participants": 6
+      "resources": ["study_room", "board_3", "pieces_2", "fm"]
     },
     {
       "id": "ev3",
       "name": "Puzzle Rush",
-      "type": "special",
+      "type": "analysis",
       "date": "2026-06-18",
-      "start": "10:00",
-      "end": "11:30",
-      "resources": ["projector","commentator_1"],
-      "participants": 25
+      "start": "14:00",
+      "end": "15:30",
+      "resources": ["study_room", "board_2", "fm"]
     },
     {
       "id": "ev4",
@@ -147,8 +149,7 @@
       "date": "2026-06-18",
       "start": "10:00",
       "end": "11:30",
-      "resources": ["gm","board_1","board_2","board_3","board_4"],
-      "participants": 4
+      "resources": ["gm","board_1","board_2","board_3","board_4"]
     }
   ],
 
@@ -156,7 +157,7 @@
     "opening_time": "09:00",
     "closing_time": "21:00",
     "reservation_anticipation": 7,
-    "min_duration": 0.5,
+    "min_duration": 0.15,
     "max_duration": 8
   }
 }

@@ -25,14 +25,14 @@ Todo está en `resources.json` y se valida automáticamente.
 
 ## Tipos de eventos
 
-| ID | Nombre | Duración predeterminada |
+| ID | Nombre | Duración minima |
 |----|--------|----------|
 | `tournament` | Torneo | 2h |
 | `class` | Clase | 1h |
-| `team_match` | Enfrentamiento | 1.5h |
-| `friendly_match` | Partida | 0.5h |
-| `analysis` | Análisis | 1h |
-| `simultaneous` | Simultánea | 1.5h |
+| `team_match` | Enfrentamiento | 0.3h |
+| `friendly_match` | Partida | 0.2h |
+| `analysis` | Análisis | 0.5h |
+| `simultaneous` | Simultánea | 1h |
 
 ---
 
