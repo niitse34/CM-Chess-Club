@@ -1,8 +1,8 @@
 # Critical Mass Chess Club - Event Scheduler
 
-Sistema para planificar eventos del club Critical Mass. Elegi este dominio por mi pasion por el ajedrez, considero que un club local de ajedrez tiene una versatilidad formidable en terminos de manejo de actividades(como partidas amistosas, torneos, clases) en correlacion con un inventario de recursos como tableros, piezas, relojes y personal facultado para su ensennanza y profesionales del juego.
+Sistema para planificar eventos del club Critical Mass. Elegí este dominio por mi pasión por el ajedrez, considero que un club local de ajedrez tiene una versatilidad formidable en términos de manejo de actividades (como partidas amistosas, torneos, clases) en correlación con un inventario de recursos como tableros, piezas, relojes y personal facultado para su enseñanza y profesionales del juego.
 
-El programa esta escrito en ingles en su totalidad por comodidad del desarrollador.
+El programa está escrito en inglés en su totalidad por comodidad del desarrollador.
 
 ## Funcionalidades
 
@@ -16,9 +16,9 @@ El programa esta escrito en ingles en su totalidad por comodidad del desarrollad
 
 En el programa predominan dos tipos de validacion:
 
-**Correquisitos:** algunos recursos dependen de otro/s para que su seleccion sea permitida por el programa. Por ejemplo, una partida amistosa necesita tablero y piezas. El programa es estricto en cuanto a la ocurrencia de eventos restringidos.
+**Correquisitos:** algunos recursos dependen de otro/s para que su selección sea permitida por el programa. Por ejemplo, una partida amistosa necesita tablero y piezas. El programa es estricto en cuanto a la ocurrencia de eventos restringidos.
 
-**Exclusiones:** algunos recursos dependen del tipo de evento. Por ejemplo, los relojes solo pueden ser utilizados en torneos. El programa responde de la misma manera que en el caso de los correquisitos
+**Exclusiones:** algunos recursos dependen del tipo de evento. Por ejemplo, los relojes solo pueden ser utilizados en torneos. El programa responde de la misma manera que en el caso de los correquisitos.
 
 Todo está en `resources.json` y se valida automáticamente.
 
@@ -44,9 +44,7 @@ pip install streamlit
 bash run.sh
 ```
 
-la web se ejecuta en la direccion: `http://localhost:8501`
-
----
+La web se ejecuta en la dirección: `http://localhost:8501`
 
 ## Estructura
 
@@ -91,16 +89,6 @@ chess_club/
 }
 ```
 
-**Nueva sección en GUI:**
-Agrega en `main.py` bajo `#pages`:
-```python
-elif page == "Nueva Seccion":
-    st.header("Nueva Seccion")
-    # código aquí
-```
-
----
-
 ## Notas
 
 - Los eventos se guardan automáticamente en `CM_chess_club.json`.
@@ -109,7 +97,8 @@ elif page == "Nueva Seccion":
 - Busca huecos hora por hora en 7 días.
 - Horario 24h, validación contra opening/closing times.
 
-##              Desarrollado por Leonardo Cordova Rosas
-# MATCOM, Universidad de La Habana.
+
+# Desarrollado por Leonardo Córdova Rosas
+## MATCOM, Universidad de La Habana.
 
 
