@@ -21,8 +21,7 @@ def write_json(data, filename="resources.json"):
     with open(resource_path, "w", encoding="utf-8") as f:
         json.dump(data, f, indent=4)
 
-st.set_page_config(page_title="Critical Mass Chess Club", layout="wide")
-st.title("Critical Mass Chess Club")
+st.set_page_config(page_title="Critical Mass Chess Club", layout="wide", page_icon="♟️")
 
 #classes
 class Resource:
@@ -125,6 +124,13 @@ class ChessClub:
         duration = (end-start).total_seconds() / 3600
         min_duration = self.config.get("min_duration", 0.5)
         max_duration = self.config.get("max_duration", 8.0)
+        
+        #check event type minimum duration
+        if type in self.event_types:
+            event_min = self.event_types[type].get("min_duration", 0)
+            if duration < event_min:
+                return False, f"{type} requires minimum {event_min}h duration"
+        
         if duration < min_duration or duration > max_duration:
             return False, f"Duration must be {min_duration}-{max_duration}h"
         
@@ -251,6 +257,28 @@ if 'club' not in st.session_state:
     st.session_state.club = club
 else:
     club = st.session_state.club
+
+#gui
+st.markdown("""
+<style>
+    h1 {
+        color: #2c3e50;
+    }
+    h2, h3 {
+        color: #34495e;
+    }
+    .stButton > button {
+        background-color: #3498db;
+        color: white;
+        border: none;
+    }
+    .stButton > button:hover {
+        background-color: #2980b9;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+st.title("♟️ Critical Mass Chess Club")
 
 #stats
 col1, col2 = st.columns(2)

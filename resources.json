@@ -9,10 +9,18 @@
     {"id": "board_2", "name": "Board 2", "type": "board"},
     {"id": "board_3", "name": "Board 3", "type": "board"},
     {"id": "board_4", "name": "Board 4", "type": "board"},
+    {"id": "c_board_1", "name": "Casual Board 1", "type": "board"},
+    {"id": "c_board_2", "name": "Casual Board 2", "type": "board"},
+    {"id": "c_board_3", "name": "Casual Board 3", "type": "board"},
+    {"id": "c_board_4", "name": "Casual Board 4", "type": "board"},
     {"id": "pieces_1", "name": "Pieces 1", "type": "pieces"},
     {"id": "pieces_2", "name": "Pieces 2", "type": "pieces"},
     {"id": "pieces_3", "name": "Pieces 3", "type": "pieces"},
     {"id": "pieces_4", "name": "Pieces 4", "type": "pieces"},
+    {"id": "cpieces_1", "name": "Casual Pieces 1", "type": "pieces"},
+    {"id": "cpieces_2", "name": "Casual Pieces 2", "type": "pieces"},
+    {"id": "cpieces_3", "name": "Casual Pieces 3", "type": "pieces"},
+    {"id": "cpieces_4", "name": "Casual Pieces 4", "type": "pieces"},
     {"id": "clock_1", "name": "Digital Clock 1", "type": "clock"},
     {"id": "clock_2", "name": "Digital Clock 2", "type": "clock"},
     {"id": "clock_3", "name": "Digital Clock 3", "type": "clock"},
@@ -46,6 +54,13 @@
       "case": "tournament",
       "requires": ["arbiter_1", "arbiter_2", "arbiter_3"],
       "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
+      "name": "Tournament requires all Boards and Pieces",
+      "case": "tournament",
+      "requires": ["board_1", "board_2", "board_3", "board_4", "pieces_1", "pieces_2", "pieces_3", "pieces_4"],
+      "min_amount": 8
     },
     {
       "type": "co_requirement",
@@ -84,9 +99,16 @@
     },
     {
       "type": "co_requirement",
-      "name": "Friendly match requires at least one board",
+      "name": "Friendly match requires at least one board or casual board",
       "case": "friendly_match",
-      "requires": ["board_1", "board_2", "board_3", "board_4"],
+      "requires": ["board_1", "board_2", "board_3", "board_4", "c_board_1", "c_board_2", "c_board_3", "c_board_4"],
+      "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
+      "name": "Friendly match requires at least one pieces or casual pieces",
+      "case": "friendly_match",
+      "requires": ["pieces_1", "pieces_2", "pieces_3", "pieces_4", "cpieces_1", "cpieces_2", "cpieces_3", "cpieces_4"],
       "min_amount": 1
     },
     {
@@ -123,35 +145,7 @@
     }
   ],
 
-  "events": [
-    {
-      "id": "ev2",
-      "name": "Opening Class",
-      "type": "class",
-      "date": "2026-06-12",
-      "start": "17:00",
-      "end": "19:00",
-      "resources": ["study_room", "board_3", "pieces_2", "fm"]
-    },
-    {
-      "id": "ev3",
-      "name": "Puzzle Rush",
-      "type": "analysis",
-      "date": "2026-06-18",
-      "start": "14:00",
-      "end": "15:30",
-      "resources": ["study_room", "board_2", "fm"]
-    },
-    {
-      "id": "ev4",
-      "name": "Simultaneous with Master",
-      "type": "simultaneous",
-      "date": "2026-06-18",
-      "start": "10:00",
-      "end": "11:30",
-      "resources": ["gm","board_1","board_2","board_3","board_4"]
-    }
-  ],
+  "events": [],
 
   "config": {
     "opening_time": "09:00",

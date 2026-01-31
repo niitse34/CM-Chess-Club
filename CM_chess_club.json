@@ -1,3 +1,14 @@
 {
-    "events": []
+    "events": [
+        {
+            "id": "event_1769876004",
+            "name": "asd",
+            "type": "tournament",
+            "start": "2026-02-01T11:00:00",
+            "end": "2026-02-01T13:30:00",
+            "resources": [
+                "arbiter_2"
+            ]
+        }
+    ]
 }
