@@ -24,7 +24,8 @@
     {"id": "clock_1", "name": "Digital Clock 1", "type": "clock"},
     {"id": "clock_2", "name": "Digital Clock 2", "type": "clock"},
     {"id": "clock_3", "name": "Digital Clock 3", "type": "clock"},
-    {"id": "clock_0", "name": "Analog Clock", "type": "clock"}
+    {"id": "clock_0", "name": "Analog Clock", "type": "clock"},
+    {"id": "projector_1", "name": "Projector", "type": "projector"}
   ],
 
   "staff": [
@@ -99,6 +100,13 @@
     },
     {
       "type": "co_requirement",
+      "name": "Team Match requires at least one set of pieces",
+      "case": "team_match",
+      "requires": ["pieces_1", "pieces_2", "pieces_3", "pieces_4"],
+      "min_amount": 1
+    },
+    {
+      "type": "co_requirement",
       "name": "Friendly match requires at least one board or casual board",
       "case": "friendly_match",
       "requires": ["board_1", "board_2", "board_3", "board_4", "c_board_1", "c_board_2", "c_board_3", "c_board_4"],
@@ -124,6 +132,13 @@
       "case": "simultaneous",
       "requires": ["board_1", "board_2", "board_3", "board_4"],
       "min_amount": 2
+    },
+    {
+      "type": "co_requirement",
+      "name": "Analysis requires Projector",
+      "case": "analysis",
+      "requires": ["projector_1"],
+      "min_amount": 1
     },
     {
       "type": "exclusion",

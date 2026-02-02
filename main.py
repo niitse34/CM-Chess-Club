@@ -121,6 +121,10 @@ class ChessClub:
         if end <= start:
             return False, "Invalid time: end must be after start"
         
+        #validate if event is scheduled for future date
+        if start.date() <= datetime.now().date():
+            return False, "Events can only be scheduled from tomorrow onwards"
+        
         duration = (end-start).total_seconds() / 3600
         min_duration = self.config.get("min_duration", 0.5)
         max_duration = self.config.get("max_duration", 8.0)
@@ -179,7 +183,7 @@ class ChessClub:
         self.events.append(event)
         return True, f"Scheduled: {name}"
     
-    def find_next_slot(self, duration, resources_ids):
+    def find_next_slot(self, duration, resources_ids, event_type=""):
         #find next available time slot for given resources
         now = datetime.now()
         curr_time = now.replace(minute=0, second=0, microsecond=0) + timedelta(hours=1)
@@ -204,7 +208,7 @@ class ChessClub:
                 if all(self.check_available(r, curr_time, end_time) for r in resources_ids):
                      #validate restrictions for potential event
                     
-                    temp = Event("temp", "", "", curr_time, end_time)
+                    temp = Event("temp", "", event_type, curr_time, end_time)
                     for resource_id in resources_ids:
                         resource = self.search_resource(resource_id)
                         if resource:
