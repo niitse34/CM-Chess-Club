@@ -38,8 +38,15 @@ Todo está en `resources.json` y se valida automáticamente.
 
 ## Instalacion y uso
 
+### Opción 1: Instalación automática (recomendado)
 ```bash
-cd /home/niitse/Documents/GitHub/cc/projects/chess_club
+cd /home/niitse/Documents/GitHub/cc
+pip install -r requirements.txt
+bash run.sh
+```
+
+### Opción 2: Instalación manual
+```bash
 pip install streamlit
 bash run.sh
 ```
@@ -95,10 +102,10 @@ chess_club/
 - Los IDs son timestamps Unix.
 - Valida duración, disponibilidad y restricciones en dicho orden.
 - Busca huecos hora por hora en 7 días.
-- Horario 24h, validación contra opening/closing times.
+- Horario 24 horas, validación contra horarios de apertura y cierre.
 
 
-# Desarrollado por Leonardo Córdova Rosas
+# Desarrollado por Leonardo Córdova Rosas (C122)
 ## MATCOM, Universidad de La Habana.
 
 
