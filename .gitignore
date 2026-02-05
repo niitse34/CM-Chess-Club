@@ -2,3 +2,4 @@ projects/prime_age.py
 projects/chess_club/app.py
 test_main.py
 test_edge_cases.py
+/__pycache__
