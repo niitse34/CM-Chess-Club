@@ -189,24 +189,6 @@ elif page == "Save/Load":
             club.load_file()
             st.success("Reloaded")
 
-    st.subheader("Spare Pieces Policy")
-    #allow editing spare policy
-    col1, col2 = st.columns(2)
-    spare_day = col1.number_input("Spare per day", min_value=0, value=int(club.spare_per_day), step=1, key="spare_day")
-    spare_event = col2.number_input("Spare per event", min_value=0, value=int(club.spare_per_event), step=1, key="spare_event")
-    if st.button("Update Spare Policy"):
-        #update in-memory
-        club.spare_per_day = int(spare_day)
-        club.spare_per_event = int(spare_event)
-        #update config and persist to resources.json
-        data = read_json("resources.json") or {}
-        cfg = data.get("config", {})
-        cfg["spare_per_day"] = int(spare_day)
-        cfg["spare_per_event"] = int(spare_event)
-        data["config"] = cfg
-        write_json(data, "resources.json")
-        st.success("Spare policy updated and saved to resources.json")
-
 #settings
 elif page == "Settings":
     st.header("Settings")
@@ -312,7 +294,23 @@ elif page == "Settings":
                 club.resources = [r for r in club.resources if r.id != item["id"]]
                 st.rerun()
 
-    # --- Restore Defaults ---
+    #spare pieces policy
+    with st.expander("Spare Pieces Policy"):
+        col1, col2 = st.columns(2)
+        spare_day = col1.number_input("Spare per day", min_value=0, value=int(club.spare_per_day), step=1, key="spare_day")
+        spare_event = col2.number_input("Spare per event", min_value=0, value=int(club.spare_per_event), step=1, key="spare_event")
+        if st.button("Update Spare Policy"):
+            club.spare_per_day = int(spare_day)
+            club.spare_per_event = int(spare_event)
+            data = read_json("resources.json") or {}
+            cfg = data.get("config", {})
+            cfg["spare_per_day"] = int(spare_day)
+            cfg["spare_per_event"] = int(spare_event)
+            data["config"] = cfg
+            write_json(data, "resources.json")
+            st.success("Spare policy updated")
+
+    #restore defaults
     if st.button("Restore Defaults"):
         defaults = st.session_state.get("defaults", {})
         if defaults:
