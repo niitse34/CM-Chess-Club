@@ -167,6 +167,7 @@
     "closing_time": "21:00",
     "reservation_anticipation": 7,
     "min_duration": 0.15,
-    "max_duration": 8
+    "max_duration": 8,
+    "blocked_days": ["Monday"]
   }
 }

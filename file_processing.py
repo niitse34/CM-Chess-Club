@@ -40,9 +40,11 @@ class FileProcessing:
             return
         self.club.events = []
         for event_data in data.get("events", []):
+            spare_pieces = event_data.get("spare_pieces")
             event = Event(event_data["id"], event_data["name"], event_data["type"],
                          datetime.fromisoformat(event_data["start"]),
-                         datetime.fromisoformat(event_data["end"]))
+                         datetime.fromisoformat(event_data["end"]),
+                         spare_pieces=spare_pieces)
             for resource_id in event_data.get("resources", []):
                 resource = self.club.search_resource(resource_id)
                 if resource:

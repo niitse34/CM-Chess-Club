@@ -22,6 +22,12 @@ En el programa predominan dos tipos de validacion:
 
 Todo está en `resources.json` y se valida automáticamente.
 
+### Condiciones óptimas
+
+**Busy Coach (Entrenador ocupado):** el sistema monitorea la carga de trabajo de cada entrenador (FM, IM, GM) en los próximos 7 días. Al crear un evento, si el entrenador seleccionado acumula más de 48 horas de eventos en la semana, se muestra una alerta visual en la interfaz con su carga actual. El sistema tambien sugiere automáticamente al entrenador con menos horas asignadas como alternativa. Esta funcionalidad es permisiva: el usuario puede ignorar la sugerencia y agendar al entrenador ocupado de todas formas.
+
+**Días bloqueados:** el sistema permite definir días de la semana en los que no se permiten eventos. Se configuran en `resources.json` bajo `config.blocked_days` (ej: `["Monday"]`). Los días deben escribirse con su nombre completo en inglés. El buscador de horarios (`find_next_slot`) también respeta esta restricción y omite los días bloqueados.
+
 
 ## Tipos de eventos
 
@@ -38,7 +44,7 @@ Todo está en `resources.json` y se valida automáticamente.
 
 ## Instalacion y uso
 
-### Opción 1: Instalación automática (recomendado)
+### Opción 1: Instalación automática
 ```bash
 cd /home/niitse/Documents/GitHub/cc
 pip install -r requirements.txt
@@ -65,36 +71,17 @@ chess_club/
 ```
 
 
-## Agregar datos al json
+## Configuración del usuario
 
-**Nuevo tipo de evento:**
-```json
-{
-  "id": "lightning",
-  "name": "Lightning",
-  "min_duration": 0.5
-}
-```
+Desde el panel **Settings** en la interfaz, el usuario puede:
 
-**Nuevo requisito:**
-```json
-{
-  "type": "co_requirement",
-  "name": "Lightning needs a clock",
-  "case": "lightning",
-  "requires": ["clock_1", "clock_2"],
-  "min_amount": 1
-}
-```
+- **Crear tipos de evento** con ID, nombre y duración mínima.
+- **Agregar recursos** (equipamiento, salas o personal) indicando categoría, ID, nombre y tipo.
+- **Definir restricciones**: correquisitos o exclusiones.
+- **Eliminar** cualquier tipo de evento, recurso o restricción existente.
+- **Restaurar valores por defecto** con un solo botón, revirtiendo `resources.json` al estado original.
 
-**Nuevo recurso:**
-```json
-{
-  "id": "board_5",
-  "name": "Board 5",
-  "type": "board"
-}
-```
+Todos los cambios persisten en `resources.json`.
 
 ## Notas
 
@@ -103,6 +90,8 @@ chess_club/
 - Valida duración, disponibilidad y restricciones en dicho orden.
 - Busca huecos hora por hora en 7 días.
 - Horario 24 horas, validación contra horarios de apertura y cierre.
+- Validacion contra dias no laborables (blocked days).
+- *Pool de piezas de repuesto:* el club dispone de un número limitado de piezas de repuesto por día (`spare_per_day`, por defecto 50). Cada evento reserva una cantidad de piezas (`spare_per_event`, por defecto 10). Al agendar un evento, el sistema suma las piezas ya reservadas por otros eventos del mismo día más las del nuevo evento; si el total excede el pool diario, el evento es rechazado. El usuario puede especificar una cantidad personalizada de piezas por evento desde la interfaz (o dejar 0 para usar el valor por defecto). Ambos valores son configurables desde `resources.json` (`config.spare_per_day`, `config.spare_per_event`) y desde la interfaz en la sección save/load.
 
 
 # Desarrollado por Leonardo Córdova Rosas (C122)

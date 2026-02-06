@@ -12,13 +12,14 @@ class Resource:
         self.type = type
         
 class Event:
-    def __init__(self,id,name,type,start,end):
+    def __init__(self,id,name,type,start,end,spare_pieces=None):
         self.id = id
         self.name = name
         self.type = type
         self.start = start
         self.end = end
         self.resources = []
+        self.spare_pieces = spare_pieces  #none means use default per event policy
         
     def add_resource(self,resource):
         self.resources.append(resource)
@@ -30,7 +31,8 @@ class Event:
             "type": self.type,
             "start": self.start.isoformat(),
             "end": self.end.isoformat(),
-            "resources": [i.id for i in self.resources]
+            "resources": [i.id for i in self.resources],
+            "spare_pieces": self.spare_pieces
         }
         
 class ChessClub:
@@ -39,6 +41,9 @@ class ChessClub:
         self.events = []
         self.restrictions = []
         self.file_processing = FileProcessing(self)
+        #spare pieces policy defaults
+        self.spare_per_day = 50
+        self.spare_per_event = 10
         
     def search_resource(self, resource_id: str) -> "Resource | None":
         #search resource by id
@@ -71,6 +76,15 @@ class ChessClub:
         self.restrictions = data.get("restrictions", [])
         self.event_types = {type["id"]: type for type in data.get("event_types", [])}
         self.config = data.get("config",{})
+        #load spare piece policy from config if present
+        try:
+            self.spare_per_day = int(self.config.get("spare_per_day", self.spare_per_day))
+        except (TypeError, ValueError):
+            self.spare_per_day = 50
+        try:
+            self.spare_per_event = int(self.config.get("spare_per_event", self.spare_per_event))
+        except (TypeError, ValueError):
+            self.spare_per_event = 10
         
     def validate_restrictions(self, event):
         #validate co-requirements and exclusions for an event
@@ -98,7 +112,7 @@ class ChessClub:
                         return False, restriction.get('name', 'Resource restriction failed')
         return True, "Valid"
         
-    def schedule_event(self, name: str, type: str, start: datetime, end: datetime, resources_ids: list) -> tuple[bool, str]:
+    def schedule_event(self, name: str, type: str, start: datetime, end: datetime, resources_ids: list, spare_pieces = None) -> tuple[bool, str]:
         #schedule new event
         if end <= start:
             return False, "Invalid time: end must be after start"
@@ -106,6 +120,13 @@ class ChessClub:
         #validate if event is scheduled for future date
         if start.date() <= datetime.now().date():
             return False, "Events can only be scheduled from tomorrow onwards"
+        
+        #check if event is scheduled on a blocked day
+        blocked_days = self.config.get("blocked_days", [])
+        if blocked_days:
+            day_name = start.strftime("%A") #get day name from date
+            if day_name in blocked_days:
+                return False, f"Events cannot be scheduled on {day_name}s"
         
         duration = (end-start).total_seconds() / 3600
         min_duration = self.config.get("min_duration", 0.5)
@@ -156,9 +177,21 @@ class ChessClub:
         valid, message = self.validate_restrictions(temp)
         if not valid:
             return False, message
+
+        #check spare pieces pool for event date
+        try:
+            event_date = start.date()
+            existing_events_same_date = [e for e in self.events if e.start.date() == event_date]
+            # use per-event spare_pieces if provided, otherwise use global default
+            spares_for_this_event = spare_pieces if spare_pieces is not None else self.spare_per_event
+            total_needed = sum(e.spare_pieces if e.spare_pieces is not None else self.spare_per_event for e in existing_events_same_date) + spares_for_this_event
+            if total_needed > self.spare_per_day:
+                return False, f"Not enough spare pieces for {event_date}: {self.spare_per_day} available, {total_needed} needed ({spares_for_this_event} for this event)"
+        except Exception:
+            pass
         
         event_id = f"event_{int(datetime.now().timestamp())}"
-        event = Event(event_id, name, type, start, end)
+        event = Event(event_id, name, type, start, end, spare_pieces=spare_pieces)
         
         for resource in assigned_resources:
             event.add_resource(resource)
@@ -173,13 +206,20 @@ class ChessClub:
         #get opening and closing times
         opening_time = self.config.get("opening_time", "00:00")
         closing_time = self.config.get("closing_time", "24:00")
+        blocked_days = self.config.get("blocked_days", [])
         try:
             opening_hours, opening_mins = map(int, opening_time.split(":"))
             closing_hours, closing_mins = map(int, closing_time.split(":"))
         except (ValueError, AttributeError):
             return None
         
-        for i in range(168):
+        for i in range(168): #7 days
+            #skip blocked days
+            day_name = curr_time.strftime("%A")
+            if day_name in blocked_days:
+                curr_time += timedelta(hours=1)
+                continue
+            
             end_time = curr_time + timedelta(hours=duration)
             opening_dt = curr_time.replace(hour=opening_hours, minute=opening_mins, second=0, microsecond=0)
             closing_dt = curr_time.replace(hour=closing_hours, minute=closing_mins, second=0, microsecond=0)
@@ -208,6 +248,40 @@ class ChessClub:
                 del self.events[i]
                 return True
         return False
+    
+    def get_coach_workload(self, coach_id: str) -> float:
+        #calculate total hours of events for a coach in the next 7 days
+        now = datetime.now()
+        week_from_now = now + timedelta(hours=168)
+        total_hours = 0.0
+        
+        for event in self.events:
+            if event.start >= now and event.start < week_from_now:
+                #check if coach is in this events resources
+                if any(r.id == coach_id for r in event.resources):
+                    duration = (event.end - event.start).total_seconds() / 3600
+                    total_hours += duration
+        
+        return total_hours
+    
+    def get_available_coaches(self) -> list:
+        #get all coaches resources
+        coach_ids = ["fm", "im", "gm"]
+        return [self.search_resource(cid) for cid in coach_ids if self.search_resource(cid)]
+    
+    def suggest_alternative_coach(self, busy_coach_id: str) -> "Resource | None":
+        #suggest less busy coach alternative
+        coaches = self.get_available_coaches()
+        if not coaches or len(coaches) < 2:
+            return None
+        
+        #find coach with least workload in next 7 days
+        least_busy = min(coaches, key=lambda c: self.get_coach_workload(c.id))
+        
+        #only suggest if least_busy is actually less busy
+        if self.get_coach_workload(least_busy.id) < self.get_coach_workload(busy_coach_id):
+            return least_busy
+        return None
     
     def save_file(self, filename="CM_chess_club.json"):
         self.file_processing.save_file(filename)
