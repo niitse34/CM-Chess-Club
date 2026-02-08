@@ -70,9 +70,9 @@ class ChessClub:
         for room in data.get("rooms", []):
             self.resources.append(Resource(room["id"], room["name"], "room"))
         for equip in data.get("equipment", []):
-            self.resources.append(Resource(equip["id"], equip["name"], "equipment"))
+            self.resources.append(Resource(equip["id"], equip["name"], equip.get("type", "equipment")))
         for person in data.get("staff", []):
-            self.resources.append(Resource(person["id"], person["name"], "staff"))
+            self.resources.append(Resource(person["id"], person["name"], person.get("type", "staff")))
         self.restrictions = data.get("restrictions", [])
         self.event_types = {type["id"]: type for type in data.get("event_types", [])}
         self.config = data.get("config",{})

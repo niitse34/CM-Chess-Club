@@ -1,6 +1,7 @@
 import streamlit as st
 from datetime import datetime, timedelta
-from main import ChessClub, read_json, write_json
+from main import ChessClub
+from file_processing import FileProcessing, read_json, write_json
 
 st.set_page_config(page_title="Critical Mass Chess Club", layout="wide", page_icon="♟️")
 
@@ -10,7 +11,7 @@ if 'club' not in st.session_state:
     club.load_initial_data()
     club.load_file()
     st.session_state.club = club
-    # snapshot original resources.json for restore-to-defaults
+    #snapshot original resources.json for restoring defaults
     import copy
     st.session_state.defaults = copy.deepcopy(read_json("resources.json") or {})
 else:
@@ -55,7 +56,7 @@ if page == "Events":
         filter_date = st.date_input("Filter by date", value=None)
         events = club.events if not filter_date else [e for e in club.events if e.start.date() == filter_date]
 
-        # show spare pieces availability for the selected date
+        #show spare pieces availability for selected date
         if filter_date:
             existing_events_same_date = [e for e in club.events if e.start.date() == filter_date]
             total_needed = len(existing_events_same_date) * club.spare_per_event
@@ -75,10 +76,10 @@ if page == "Events":
 #add event
 elif page == "Add Event":
     st.header("Schedule Event")
-    # show current spare pieces policy
+    #show current spare pieces policy
     st.subheader("Spare Pieces Policy")
     st.write(f"{club.spare_per_event} per event, {club.spare_per_day} per day")
-    # Show scheduling message if present
+    #show scheduling message
     if "schedule_msg" in st.session_state:
         msg, msg_type = st.session_state.pop("schedule_msg")
         if msg_type == "success":
@@ -95,12 +96,16 @@ elif page == "Add Event":
     spare_pieces_for_event = st.number_input("Spare pieces for this event (0 = use default)", min_value=0, value=0, step=1)
     
     st.write("Resources:")
-    cols = st.columns(3)
     selected = []
-    for i, r in enumerate(club.resources):
-        with cols[i % 3]:
-            if st.checkbox(r.name, key=f"res_{r.id}"):
-                selected.append(r.id)
+    resource_types = sorted(list(set(r.type for r in club.resources)))
+    for r_type in resource_types:
+        with st.expander(f"{r_type.title()}", expanded=True):
+            type_resources = [r for r in club.resources if r.type == r_type]
+            cols = st.columns(3)
+            for i, r in enumerate(type_resources):
+                with cols[i % 3]:
+                    if st.checkbox(r.name, key=f"res_{r.id}"):
+                        selected.append(r.id)
     
     #check for busy coaches and show recommendations
     busy_coaches = []
@@ -146,12 +151,16 @@ elif page == "Find Slot":
     duration = st.number_input("Duration (h)", 0.5, 8.0, 2.0, step=0.5)
     
     st.write("Resources:")
-    cols = st.columns(3)
     selected = []
-    for i, r in enumerate(club.resources):
-        with cols[i % 3]:
-            if st.checkbox(r.name, key=f"find_{r.id}"):
-                selected.append(r.id)
+    resource_types = sorted(list(set(r.type for r in club.resources)))
+    for r_type in resource_types:
+        with st.expander(f"{r_type.title()}", expanded=True):
+            type_resources = [r for r in club.resources if r.type == r_type]
+            cols = st.columns(3)
+            for i, r in enumerate(type_resources):
+                with cols[i % 3]:
+                    if st.checkbox(r.name, key=f"find_{r.id}"):
+                        selected.append(r.id)
     
     if st.button("Search"):
         if not selected:
