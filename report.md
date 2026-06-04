@@ -2,7 +2,7 @@
 
 Sistema para planificar eventos del club Critical Mass. Elegí este dominio por mi pasión por el ajedrez, considero que un club local de ajedrez tiene una versatilidad formidable en términos de manejo de actividades (como partidas amistosas, torneos, clases) en correlación con un inventario de recursos como tableros, piezas, relojes y personal facultado para su enseñanza y profesionales del juego.
 
-El programa está escrito en inglés en su totalidad por comodidad del desarrollador.
+El programa está escrito en inglés en su totalidad por comodidad personal.
 
 ## Funcionalidades
 
