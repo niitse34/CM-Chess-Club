@@ -1,0 +1,38 @@
+[project]
+name = "critical-mass-chess-club"
+version = "1.5.2"
+description = "Sistema de planificación de eventos para el club de ajedrez Critical Mass"
+readme = "report.md"
+requires-python = ">=3.8"
+keywords = ["chess", "club", "event-scheduler", "streamlit", "tournament", "ajedrez"]
+authors = [
+  {name = "Leonardo Cordova Rosas", email = "leonardo.cordova@estudiantes.matcom.uh.cu"}
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.8",
+  "Programming Language :: Python :: 3.9",
+  "Programming Language :: Python :: 3.10",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+    "Operating System :: POSIX :: Linux",
+  "Topic :: Games/Entertainment :: Board Games"
+]
+
+dependencies = [
+  "streamlit>=1.28.0"
+]
+
+[project.optional-dependencies]
+test = [
+  "pytest>=7.0.0",
+  "pytest-cov>=4.0.0"
+]
+
+[project.urls]
+repository = "https://github.com/niitse34/CM-Chess-Club"
+homepage = "https://github.com/niitse34"
+
+[project.scripts]
+chess-club = "main:main"
