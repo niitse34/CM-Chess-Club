@@ -1,1 +1,1 @@
-Chess club themed event scheduled built on python with streamlit
+Chess club themed simple web event scheduler built on python with streamlit
