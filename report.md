@@ -48,7 +48,7 @@ En el programa predominan dos tipos de validacion:
 
 **Correquisitos:** algunos recursos dependen de otro/s para que su selección sea permitida por el programa. Por ejemplo, una partida amistosa necesita tablero y piezas. El programa es estricto en cuanto a la ocurrencia de eventos restringidos.
 
-**Exclusiones:** algunos recursos dependen del tipo de evento. Por ejemplo, los relojes solo pueden ser utilizados en torneos. El programa responde de la misma manera que en el caso de los correquisitos.
+**Exclusiones:** algunos recursos dependen del tipo de evento. Por ejemplo, los relojes solo pueden ser utilizados en eventos específicos. El programa responde de la misma manera que en el caso de los correquisitos.
 
 Todo está en `resources.json` y se valida automáticamente.
 
@@ -86,6 +86,7 @@ La web se ejecuta en la dirección: `http://localhost:8501`
 ```
 chess_club/
 ├── main.py           # programa
+├── gui.py           #interfaz gráfica en streamlit (archivo que corre run.sh)
 ├── models.py       # clases y funciones auxiliares
 ├── resources.json    # configuración, archivo para persistencia de datos
 ├── CM_chess_club.json # eventos guardados durante la ejecucion de la aplicacion

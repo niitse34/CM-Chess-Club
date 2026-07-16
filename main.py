@@ -1,6 +1,7 @@
 
 import json
 from datetime import datetime, timedelta
+import logging
 import os
 from file_processing import FileProcessing, read_json, write_json
 from models import Resource, Event
@@ -158,7 +159,8 @@ class ChessClub:
             if total_needed > self.spare_per_day:
                 return False, f"Not enough spare pieces for {event_date}: {self.spare_per_day} available, {total_needed} needed ({spares_for_this_event} for this event)"
         except Exception:
-            pass
+            logging.exception("Error checking spare pieces for event '%s'", name)
+            return False, "Error checking spare pieces"
         
         event_id = f"event_{int(datetime.now().timestamp())}"
         event = Event(event_id, name, type, start, end, spare_pieces=spare_pieces)
